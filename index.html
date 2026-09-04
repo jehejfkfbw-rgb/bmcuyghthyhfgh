@@ -3,230 +3,612 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سهرة لايف - الغرف والتحكم 🌟</title>
+    <title>Yaahlan - Mega Voice Chat & Entertainment Platform (1000+ Lines)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { user-select: none; -webkit-tap-highlight-color: transparent; }
-        ::-webkit-scrollbar { display: none; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .fade-in { animation: fadeIn 0.25s ease-out forwards; }
+        body { user-select: none; -webkit-tap-highlight-color: transparent; background-color: #030007; color: #fff; font-family: system-ui, -apple-system, sans-serif; }
+        ::-webkit-scrollbar { width: 3px; height: 3px; }
+        ::-webkit-scrollbar-thumb { background: #7e22ce; border-radius: 4px; }
+        .app-gradient { background: linear-gradient(135deg, #1e0b36 0%, #030007 100%); }
+        .tab-pane { display: none; }
+        .tab-pane.active { display: flex; }
+        @keyframes glow { 0%, 100% { box-shadow: 0 0 15px rgba(168, 85, 247, 0.4); } 50% { box-shadow: 0 0 35px rgba(168, 85, 247, 0.9); } }
+        .neon-glow { animation: glow 3s infinite; }
+        @keyframes float-anim { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+        .floating { animation: float-anim 2s infinite ease-in-out; }
+        @keyframes pulse-border { 0% { border-color: rgba(168, 85, 247, 0.4); } 50% { border-color: rgba(236, 72, 153, 0.9); } 100% { border-color: rgba(168, 85, 247, 0.4); } }
+        .animated-border { animation: pulse-border 2.5s infinite; }
     </style>
 </head>
-<body class="bg-slate-950 text-white h-screen flex flex-col justify-between max-w-md mx-auto border-x border-slate-800 shadow-2xl relative overflow-hidden">
+<body class="h-screen flex flex-col justify-between max-w-md mx-auto border-x border-purple-950/40 shadow-2xl relative overflow-hidden app-gradient">
 
-    <!-- شاشة تسجيل الدخول بحساب جوجل (إيميل وباسورد) -->
-    <div id="loginScreen" class="fixed inset-0 bg-slate-950 z-50 flex flex-col items-center justify-center p-6 text-center">
-        <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl w-full shadow-2xl space-y-4">
-            <div class="text-4xl">🌐💎</div>
-            <h1 class="text-xl font-black text-purple-400">مرحباً بك في سهرة لايف</h1>
-            <p class="text-xs text-slate-400">سجل دخولك بحساب جوجل للمتابعة والدخول إلى الغرف والألعاب.</p>
-            
-            <div class="space-y-3 pt-2 text-right">
-                <div>
-                    <label class="text-[10px] text-slate-400 block mb-1">البريد الإلكتروني (Google Email)</label>
-                    <input type="email" id="googleEmail" placeholder="name@gmail.com" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-xs text-white focus:outline-none focus:border-purple-500">
-                </div>
-                <div>
-                    <label class="text-[10px] text-slate-400 block mb-1">كلمة المرور (Password)</label>
-                    <input type="password" id="googlePass" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-xs text-white focus:outline-none focus:border-purple-500">
-                </div>
-                <button onclick="performGoogleLogin()" class="w-full bg-white hover:bg-slate-100 text-slate-950 py-3 rounded-xl font-bold text-xs transition shadow-lg mt-2 active:scale-95">
-                    تسجيل الدخول بحساب جوجل 🚀
-                </button>
+    <!-- ==================== 1. شاشة اختيار اللغة المطورة ==================== -->
+    <div id="screen-lang" class="fixed inset-0 bg-[#030007] z-50 flex flex-col justify-between p-6 text-center">
+        <div class="pt-12">
+            <div class="w-24 h-24 bg-gradient-to-tr from-purple-600 via-pink-600 to-indigo-600 rounded-3xl mx-auto flex items-center justify-center text-4xl shadow-2xl neon-glow">🌐</div>
+            <h1 class="text-2xl font-black mt-6 text-purple-200">اختر لغتك المفضلة</h1>
+            <p class="text-xs text-slate-400 mt-1">Select your preferred language to continue</p>
+        </div>
+        <div class="space-y-3.5 my-auto w-full">
+            <div onclick="selectLanguage(this)" class="lang-option bg-slate-900/90 border border-slate-800 p-4 rounded-2xl text-sm font-semibold cursor-pointer transition hover:border-purple-500">English</div>
+            <div onclick="selectLanguage(this)" class="lang-option bg-slate-900 border border-purple-500 p-4 rounded-2xl text-sm font-bold text-purple-300 cursor-pointer shadow-lg shadow-purple-900/40">العربية (Arabic)</div>
+            <div onclick="selectLanguage(this)" class="lang-option bg-slate-900/90 border border-slate-800 p-4 rounded-2xl text-sm font-semibold cursor-pointer transition hover:border-purple-500">Türkçe</div>
+            <div onclick="selectLanguage(this)" class="lang-option bg-slate-900/90 border border-slate-800 p-4 rounded-2xl text-sm font-semibold cursor-pointer transition hover:border-purple-500">Русский</div>
+            <div onclick="selectLanguage(this)" class="lang-option bg-slate-900/90 border border-slate-800 p-4 rounded-2xl text-sm font-semibold cursor-pointer transition hover:border-purple-500">Français</div>
+            <div onclick="selectLanguage(this)" class="lang-option bg-slate-900/90 border border-slate-800 p-4 rounded-2xl text-sm font-semibold cursor-pointer transition hover:border-purple-500">Español</div>
+        </div>
+        <button onclick="proceedToLogin()" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 py-4 rounded-2xl font-bold text-sm shadow-xl hover:opacity-90 transition">التالي</button>
+    </div>
+
+    <!-- ==================== 2. شاشة تسجيل الدخول المتقدمة ==================== -->
+    <div id="screen-login" class="fixed inset-0 bg-[#030007] z-45 hidden flex-col justify-between p-6 text-center">
+        <div class="flex justify-between pt-2 items-center text-xs text-purple-400 font-bold">
+            <span class="cursor-pointer" onclick="backToLang()">← رجوع</span>
+            <span>العربية 🌐</span>
+        </div>
+        <div class="flex flex-col items-center space-y-3 my-auto">
+            <div class="w-28 h-28 bg-gradient-to-tr from-purple-600 via-indigo-600 to-cyan-400 rounded-3xl flex items-center justify-center shadow-2xl text-5xl font-black neon-glow floating">Y</div>
+            <h1 class="text-3xl font-black tracking-wider text-white mt-2">Yaahlan</h1>
+            <p class="text-xs text-slate-400">Join the Fun, Meet New Friends Worldwide</p>
+        </div>
+        <div class="space-y-4 pb-6 w-full">
+            <div onclick="executeLogin()" class="w-full bg-slate-900 border border-slate-800 hover:bg-slate-800 py-4 rounded-2xl text-xs font-bold flex items-center justify-center space-x-3 space-x-reverse cursor-pointer shadow-lg transition">
+                <span class="text-red-500 font-black text-base">G</span>
+                <span>تسجيل الدخول باستخدام Google</span>
+            </div>
+            <div onclick="executeLogin()" class="w-full bg-slate-900 border border-slate-800 hover:bg-slate-800 py-4 rounded-2xl text-xs font-bold flex items-center justify-center space-x-3 space-x-reverse cursor-pointer shadow-lg transition">
+                <span class="text-blue-500 font-black text-base">f</span>
+                <span>تسجيل الدخول باستخدام Facebook</span>
+            </div>
+            <div class="flex justify-center space-x-5 space-x-reverse pt-2">
+                <div class="w-12 h-12 bg-slate-900 border border-slate-800 rounded-full flex items-center justify-center text-sm text-slate-300 cursor-pointer shadow-md">✉️</div>
+                <div class="w-12 h-12 bg-slate-900 border border-slate-800 rounded-full flex items-center justify-center text-sm text-blue-400 font-bold cursor-pointer shadow-md">t</div>
+                <div class="w-12 h-12 bg-slate-900 border border-slate-800 rounded-full flex items-center justify-center text-sm text-slate-300 cursor-pointer shadow-md">📱</div>
+            </div>
+            <div class="flex items-center justify-center space-x-2 space-x-reverse text-[11px] text-slate-500 pt-3">
+                <input type="checkbox" id="terms-check" checked class="accent-purple-600">
+                <label>أوافق على <span class="text-purple-400 underline cursor-pointer">اتفاقية المستخدم</span> و <span class="text-purple-400 underline cursor-pointer">سياسة الخصوصية</span></label>
             </div>
         </div>
     </div>
 
-    <!-- نافذة إنشاء غرفة جديدة -->
-    <div id="roomModal" class="fixed inset-0 bg-slate-950/95 z-40 hidden flex flex-col p-4 justify-center items-center">
-        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl w-full max-w-sm space-y-4 shadow-2xl">
-            <h2 class="font-bold text-lg text-purple-400 text-center">إنشاء غرفة دردشة جديدة 🎙️</h2>
-            <div>
-                <label class="text-[10px] text-slate-400 block mb-1">اسم الغرفة</label>
-                <input type="text" id="newRoomName" placeholder="مثال: سهرة الشباب، غرفة العاب..." class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-xs text-white focus:outline-none focus:border-purple-500">
-            </div>
-            <div>
-                <label class="text-[10px] text-slate-400 block mb-1">عدد المقاعد المتاحة (من 12 إلى 18)</label>
-                <select id="newRoomSeats" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-xs text-white focus:outline-none focus:border-purple-500">
-                    <option value="12">12 مقعداً</option>
-                    <option value="14">14 مقعداً</option>
-                    <option value="16">16 مقعداً</option>
-                    <option value="18" selected>18 مقعداً</option>
-                </select>
-            </div>
-            <div class="flex space-x-2 space-x-reverse pt-2">
-                <button onclick="submitCreateRoom()" class="flex-1 bg-purple-600 hover:bg-purple-700 py-2.5 rounded-xl text-xs font-bold transition">إنشاء ودخول</button>
-                <button onclick="toggleRoomModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 py-2.5 rounded-xl text-xs font-bold transition">إلغاء</button>
-            </div>
+    <!-- ==================== رأس التطبيق العام (Header) ==================== -->
+    <header class="bg-[#030007]/95 backdrop-blur-md border-b border-purple-950/40 p-3.5 flex justify-between items-center z-25">
+        <div class="flex items-center space-x-2 space-x-reverse text-xs">
+            <button onclick="openGenericModal('modal-agency')" class="bg-purple-950/80 border border-purple-800/60 px-3 py-1.5 rounded-xl font-bold text-purple-300 flex items-center space-x-1.5 space-x-reverse shadow-md">
+                <span>🏰</span>
+                <span>الوكالة</span>
+            </button>
+            <button onclick="openGenericModal('modal-store')" class="bg-indigo-950/80 border border-indigo-800/60 px-3 py-1.5 rounded-xl font-bold text-indigo-300 flex items-center space-x-1.5 space-x-reverse shadow-md">
+                <span>🛍️</span>
+                <span>المتجر</span>
+            </button>
         </div>
-    </div>
-
-    <!-- رأس التطبيق -->
-    <header class="bg-slate-900 border-b border-slate-800 p-4 flex justify-between items-center z-10">
+        <div class="text-sm font-black text-white tracking-wide" id="topbar-title">الغرف</div>
         <div class="flex items-center space-x-2 space-x-reverse">
-            <span class="text-xs font-bold text-cyan-400 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800" id="currentRoleDisplay">حسابي</span>
+            <button onclick="openGenericModal('modal-tasks')" class="bg-amber-500/15 border border-amber-500/30 px-3.5 py-1.5 rounded-xl text-xs text-amber-300 font-bold shadow-md">🎁 مهام</button>
         </div>
-        <div class="text-sm font-black text-purple-400">سهرة لايف 🌟</div>
-        <button onclick="toggleRoomModal()" class="bg-purple-600/20 border border-purple-500/30 px-3 py-1.5 rounded-xl text-xs font-bold text-purple-300 hover:bg-purple-600/30 transition">
-            + إنشاء غرفة
-        </button>
     </header>
 
-    <!-- محتوى التطبيق -->
-    <main class="flex-1 p-4 flex flex-col space-y-3 overflow-hidden">
+    <!-- ==================== محتوى التبويبات الرئيسية (Single Page Body) ==================== -->
+    <main class="flex-1 overflow-y-auto relative">
         
-        <!-- قائمة الغرف المتاحة للانضمام -->
-        <div>
-            <p class="text-[11px] font-bold text-slate-400 mb-2">الغرف المتاحة حالياً:</p>
-            <div class="flex space-x-2 space-x-reverse overflow-x-auto pb-1" id="roomsListContainer">
-                <div onclick="switchRoom('الدردشة العامة 🌐', 18, 'النظام')" class="room-tab bg-purple-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold shrink-0 cursor-pointer shadow-md transition">
-                    الدردشة العامة (18 مقعد)
+        <!-- -------------------- أ. تبويب الغرف الصوتية (Rooms) -------------------- -->
+        <div id="pane-rooms" class="tab-pane active flex-col p-3.5 space-y-3.5">
+            <!-- شريط الدول والتصنيفات -->
+            <div class="flex space-x-2 space-x-reverse overflow-x-auto pb-1 text-xs">
+                <span class="bg-purple-600 text-white px-3.5 py-1.5 rounded-xl font-bold shrink-0 cursor-pointer shadow-md">الكل</span>
+                <span class="bg-slate-900 border border-slate-800 text-slate-300 px-3.5 py-1.5 rounded-xl shrink-0 cursor-pointer">مصر 🇪🇬</span>
+                <span class="bg-slate-900 border border-slate-800 text-slate-300 px-3.5 py-1.5 rounded-xl shrink-0 cursor-pointer">السعودية 🇸🇦</span>
+                <span class="bg-slate-900 border border-slate-800 text-slate-300 px-3.5 py-1.5 rounded-xl shrink-0 cursor-pointer">العراق 🇮🇶</span>
+                <span class="bg-slate-900 border border-slate-800 text-slate-300 px-3.5 py-1.5 rounded-xl shrink-0 cursor-pointer">الإمارات 🇦🇪</span>
+                <span class="bg-slate-900 border border-slate-800 text-slate-300 px-3.5 py-1.5 rounded-xl shrink-0 cursor-pointer">تركيا 🇹🇷</span>
+                <span class="bg-slate-900 border border-slate-800 text-slate-300 px-3.5 py-1.5 rounded-xl shrink-0 cursor-pointer">المغرب 🇲🇦</span>
+            </div>
+
+            <!-- بنر الإعلانات والفعاليات الكبرى -->
+            <div class="bg-gradient-to-r from-purple-900/50 via-indigo-950 to-slate-900 border border-purple-800/50 p-4 rounded-2xl flex justify-between items-center shadow-xl relative overflow-hidden">
+                <div class="space-y-1">
+                    <span class="text-[10px] bg-purple-500/20 text-purple-300 px-2.5 py-0.5 rounded-md font-bold">فعالية الأسبوع الكبرى</span>
+                    <h3 class="text-xs font-bold text-white">بطولة بطل الساعات الذهبية 🏆</h3>
+                    <p class="text-[10px] text-slate-400">نافس الآن على المركز الأول واكسب إطار ملكي دائم.</p>
+                </div>
+                <div class="text-3xl">🔥</div>
+            </div>
+
+            <!-- قائمة الغرف النشطة المتنوعة -->
+            <div class="space-y-2.5">
+                <div onclick="openVoiceRoom('أهلاً بالمستخدمين الجدد والترحيب بالعشاق', '25', 'سارة المصري', 'مصر 🇪🇬')" class="bg-slate-900/90 border border-slate-800/80 p-3.5 rounded-2xl flex items-center justify-between cursor-pointer hover:border-purple-500/50 transition shadow-md">
+                    <div class="flex items-center space-x-3 space-x-reverse">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center text-lg font-black shadow-md">🎙️</div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">أهلاً بالمستخدمين الجدد والترحيب بالعشاق 🌟</h4>
+                            <p class="text-[10px] text-slate-400 mt-0.5">المضيف: سارة المصري • اجتماعيات</p>
+                        </div>
+                    </div>
+                    <span class="text-[11px] bg-purple-950 text-purple-300 px-2.5 py-1 rounded-xl border border-purple-800/60 font-bold">👥 25</span>
+                </div>
+
+                <div onclick="openVoiceRoom('سهرة طرب ومحبي العود الأصيل والكلمات', '18', 'كريم الأردني', 'الأردن 🇯🇴')" class="bg-slate-900/90 border border-slate-800/80 p-3.5 rounded-2xl flex items-center justify-between cursor-pointer hover:border-purple-500/50 transition shadow-md">
+                    <div class="flex items-center space-x-3 space-x-reverse">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-600 to-red-600 flex items-center justify-center text-lg font-black shadow-md">🎸</div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">سهرة طرب ومحبي العود الأصيل 🎵</h4>
+                            <p class="text-[10px] text-slate-400 mt-0.5">المضيف: كريم الأردني • موسيقى</p>
+                        </div>
+                    </div>
+                    <span class="text-[11px] bg-purple-950 text-purple-300 px-2.5 py-1 rounded-xl border border-purple-800/60 font-bold">👥 18</span>
+                </div>
+
+                <div onclick="openVoiceRoom('تحديات وكالة الضغط العالي PK الساخنة', '32', 'الزعيم أبو عساف', 'السعودية 🇸🇦')" class="bg-slate-900/90 border border-slate-800/80 p-3.5 rounded-2xl flex items-center justify-between cursor-pointer hover:border-purple-500/50 transition shadow-md">
+                    <div class="flex items-center space-x-3 space-x-reverse">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center text-lg font-black shadow-md">⚔️</div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">تحديات وكالة الضغط العالي PK 🔥</h4>
+                            <p class="text-[10px] text-slate-400 mt-0.5">المضيف: أبو عساف • منافسة</p>
+                        </div>
+                    </div>
+                    <span class="text-[11px] bg-purple-950 text-purple-300 px-2.5 py-1 rounded-xl border border-purple-800/60 font-bold">👥 32</span>
+                </div>
+
+                <div onclick="openVoiceRoom('جلسة شِعر وقوافي ليلية هادئة', '14', 'نور الشام', 'سوريا 🇸🇾')" class="bg-slate-900/90 border border-slate-800/80 p-3.5 rounded-2xl flex items-center justify-between cursor-pointer hover:border-purple-500/50 transition shadow-md">
+                    <div class="flex items-center space-x-3 space-x-reverse">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-600 flex items-center justify-center text-lg font-black shadow-md">📜</div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">جلسة شِعر وقوافي ليلية هادئة 🖋️</h4>
+                            <p class="text-[10px] text-slate-400 mt-0.5">المضيف: نور الشام • أدب وثقافة</p>
+                        </div>
+                    </div>
+                    <span class="text-[11px] bg-purple-950 text-purple-300 px-2.5 py-1 rounded-xl border border-purple-800/60 font-bold">👥 14</span>
+                </div>
+
+                <div onclick="openVoiceRoom('ديوانية شباب الخليج والوناسة', '22', 'سلطان القحطاني', 'الكويت 🇰🇼')" class="bg-slate-900/90 border border-slate-800/80 p-3.5 rounded-2xl flex items-center justify-between cursor-pointer hover:border-purple-500/50 transition shadow-md">
+                    <div class="flex items-center space-x-3 space-x-reverse">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-yellow-600 to-amber-500 flex items-center justify-center text-lg font-black shadow-md">☕</div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">ديوانية شباب الخليج والوناسة 🌴</h4>
+                            <p class="text-[10px] text-slate-400 mt-0.5">المضيف: سلطان القحطاني • سوالف</p>
+                        </div>
+                    </div>
+                    <span class="text-[11px] bg-purple-950 text-purple-300 px-2.5 py-1 rounded-xl border border-purple-800/60 font-bold">👥 22</span>
                 </div>
             </div>
         </div>
 
-        <!-- معلومات الغرفة الحالية والمقاعد -->
-        <div class="bg-slate-900/80 border border-slate-800 px-4 py-2.5 rounded-xl flex justify-between items-center text-xs">
-            <span id="activeRoomTitle" class="font-bold text-purple-300">أنت الآن في: الدردشة العامة 🌐</span>
-            <span class="bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 text-cyan-400 font-bold" id="activeRoomSeatsInfo">المقاعد: 1 / 18</span>
-        </div>
+        <!-- -------------------- ب. تبويب الألعاب (Games Hub) -------------------- -->
+        <div id="pane-games" class="tab-pane flex-col p-3.5 space-y-3.5">
+            <div class="grid grid-cols-3 gap-3">
+                <div onclick="openGameRoom('لعبة لودو الملوكية (Ludo)')" class="bg-slate-900 border border-slate-800 p-3 rounded-2xl text-center cursor-pointer hover:border-purple-500 transition space-y-1.5 shadow-md">
+                    <div class="text-3xl">🎲</div>
+                    <span class="text-[11px] font-black text-purple-300 block">LUDO</span>
+                </div>
+                <div onclick="openGameRoom('لعبة دومينو الأصدقاء (Domino)')" class="bg-slate-900 border border-slate-800 p-3 rounded-2xl text-center cursor-pointer hover:border-purple-500 transition space-y-1.5 shadow-md">
+                    <div class="text-3xl">🁫</div>
+                    <span class="text-[11px] font-black text-cyan-300 block">DOMINO</span>
+                </div>
+                <div onclick="openGameRoom('لعبة شطرنج الأبطال (Chess)')" class="bg-slate-900 border border-slate-800 p-3 rounded-2xl text-center cursor-pointer hover:border-purple-500 transition space-y-1.5 shadow-md">
+                    <div class="text-3xl">♟️</div>
+                    <span class="text-[11px] font-black text-amber-300 block">CHESS</span>
+                </div>
+            </div>
 
-        <!-- صندوق الرسائل والشات -->
-        <div id="chatBox" class="flex-1 bg-slate-900/40 border border-slate-800/80 rounded-2xl p-4 overflow-y-auto space-y-3">
-            <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-xs space-y-1">
-                <span class="font-bold text-purple-400">نظام السيستم الآلي 🤖</span>
-                <p class="text-slate-300">أهلاً بك في سهرة لايف. إذا أنشأت غرفة، يمكنك حظر أي شخص مزعج يكتب رسائل مخالفة بضغط زر الحظر.</p>
+            <div class="bg-gradient-to-r from-purple-950 to-slate-900 border border-purple-800/50 p-4 rounded-2xl space-y-2.5 shadow-lg">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xs font-bold text-purple-200">صندوق الكنز اليومي للألعاب 💎</h3>
+                    <span class="text-[10px] text-amber-400 font-bold">متاحة الآن</span>
+                </div>
+                <p class="text-[10px] text-slate-400 leading-relaxed">العب لمدة 5 دقائق في أي لعبة من الألعاب أعلاه واكسب مكافآت ألماس مجانية مباشرة إلى محفظتك.</p>
+                <button onclick="alert('تم استلام مكافأة الكنز بنجاح! +50 💎')" class="w-full bg-purple-600 hover:bg-purple-700 py-2.5 rounded-xl text-xs font-bold shadow-md transition">افتح الصندوق الآن</button>
             </div>
         </div>
 
-        <!-- صندوق الكتابة وإرسال الرسائل -->
-        <div class="flex space-x-2 space-x-reverse">
-            <input type="text" id="messageInput" placeholder="اكتب رسالتك..." class="flex-1 bg-slate-900 border border-slate-800 p-3 rounded-xl text-xs text-white focus:outline-none focus:border-purple-500">
-            <button onclick="sendMessage()" class="bg-purple-600 hover:bg-purple-700 px-5 rounded-xl text-xs font-bold transition active:scale-95">إرسال 🚀</button>
+        <!-- -------------------- ج. تبويب الرسائل (Messages) -------------------- -->
+        <div id="pane-messages" class="tab-pane flex-col p-3.5 space-y-3">
+            <div class="flex space-x-2 space-x-reverse pb-1 text-xs">
+                <span class="bg-purple-600 text-white px-3.5 py-1.5 rounded-xl font-bold cursor-pointer shadow-md">الكل</span>
+                <span class="bg-slate-900 border border-slate-800 text-slate-300 px-3.5 py-1.5 rounded-xl cursor-pointer">الإشعارات</span>
+                <span class="bg-slate-900 border border-slate-800 text-slate-300 px-3.5 py-1.5 rounded-xl cursor-pointer">المتابعين</span>
+                <span class="bg-slate-900 border border-slate-800 text-slate-300 px-3.5 py-1.5 rounded-xl cursor-pointer">الوكالات</span>
+            </div>
+
+            <div class="space-y-2.5">
+                <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-slate-850 shadow-md">
+                    <div class="flex items-center space-x-3 space-x-reverse">
+                        <div class="w-11 h-11 bg-cyan-500/20 text-cyan-400 rounded-2xl flex items-center justify-center font-bold text-lg shadow-inner">🔔</div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">إشعار النظام الرسمي</h4>
+                            <p class="text-[10px] text-slate-400">تهانينا! لقد انضمت إلى مجتمع يا أهلاً بنجاح.</p>
+                        </div>
+                    </div>
+                    <span class="text-[10px] text-purple-400">اليوم</span>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-slate-850 shadow-md">
+                    <div class="flex items-center space-x-3 space-x-reverse">
+                        <div class="w-11 h-11 bg-purple-500/20 text-purple-400 rounded-2xl flex items-center justify-center font-bold text-lg shadow-inner">💬</div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">دعم العملاء</h4>
+                            <p class="text-[10px] text-slate-400">كيف يمكننا مساعدتك اليوم في التطبيق؟</p>
+                        </div>
+                    </div>
+                    <span class="text-[10px] text-slate-500">أمس</span>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-slate-850 shadow-md">
+                    <div class="flex items-center space-x-3 space-x-reverse">
+                        <div class="w-11 h-11 bg-amber-500/20 text-amber-400 rounded-2xl flex items-center justify-center font-bold text-lg shadow-inner">🏰</div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">إدارة الوكالات المركزية</h4>
+                            <p class="text-[10px] text-slate-400">تم قبول تقرير الأداء الأسبوعي الخاص بك.</p>
+                        </div>
+                    </div>
+                    <span class="text-[10px] text-slate-500">منذ يومين</span>
+                </div>
+            </div>
         </div>
+
+        <!-- -------------------- د. تبويب المنشورات (Moments / Feed) -------------------- -->
+        <div id="pane-posts" class="tab-pane flex-col p-3.5 space-y-3.5">
+            <div class="flex space-x-2 space-x-reverse overflow-x-auto pb-1 text-xs">
+                <span class="bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl text-slate-300 shrink-0">#عائلتي 👑</span>
+                <span class="bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl text-slate-300 shrink-0">#تصاميم_ياأهلاً ✨</span>
+                <span class="bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl text-slate-300 shrink-0">#سهرات_صوتية 🎙️</span>
+                <span class="bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl text-slate-300 shrink-0">#فعاليات 💎</span>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-3 shadow-xl">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-2 space-x-reverse">
+                        <div class="w-9 h-9 bg-purple-600 rounded-full flex items-center justify-center text-xs font-bold shadow-md">👑</div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">إدارة ياأهلاً الرسمية</h4>
+                            <p class="text-[9px] text-slate-400">منذ ساعتين</p>
+                        </div>
+                    </div>
+                    <span class="text-[10px] bg-purple-950 text-purple-300 px-2.5 py-0.5 rounded-lg border border-purple-800 font-bold">إعلان</span>
+                </div>
+                <p class="text-xs text-slate-200 leading-relaxed">أقوى فعاليات الشحن والوكالات لشهر سبتمبر بدأت الآن! انضم إلى الغرف المميزة واكسب هدايا الدخول الخيالية والدعم المباشر.</p>
+                <div class="flex justify-between items-center text-xs text-slate-400 pt-2 border-t border-slate-800">
+                    <span>❤️ 342 إعجاب</span>
+                    <span>💬 45 تعليق</span>
+                    <span>🔗 مشاركة</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- -------------------- هـ. تبويب أنا (Profile) -------------------- -->
+        <div id="pane-profile" class="tab-pane flex-col p-3.5 space-y-3.5">
+            <!-- كارت المستخدم الرئيسي -->
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex items-center space-x-3 space-x-reverse shadow-xl">
+                <div class="w-16 h-16 bg-gradient-to-tr from-amber-600 to-yellow-400 rounded-full flex items-center justify-center text-2xl font-black shadow-lg">🦁</div>
+                <div>
+                    <h3 class="text-sm font-black text-white">محمد محمد</h3>
+                    <p class="text-[10px] text-slate-400 mt-0.5">ID: 109541348 🆔</p>
+                    <div class="flex space-x-2 space-x-reverse mt-1.5 text-[9px]">
+                        <span class="bg-purple-950 border border-purple-800 text-purple-300 px-2.5 py-0.5 rounded-md font-bold shadow-sm">LV. 12</span>
+                        <span class="bg-amber-950 border border-amber-800 text-amber-300 px-2.5 py-0.5 rounded-md font-bold shadow-sm">VIP 3</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- إحصائيات المتابعة -->
+            <div class="grid grid-cols-3 gap-2 text-center bg-slate-900/60 border border-slate-800/80 p-3 rounded-2xl text-xs shadow-md">
+                <div><span class="font-black text-white text-sm">13</span><span class="text-[10px] text-slate-400 block">المتابعون</span></div>
+                <div><span class="font-black text-white text-sm">2</span><span class="text-[10px] text-slate-400 block">المتابعة</span></div>
+                <div><span class="font-black text-white text-sm">1</span><span class="text-[10px] text-slate-400 block">الأصدقاء</span></div>
+            </div>
+
+            <!-- الحضور اليومي -->
+            <div class="bg-gradient-to-r from-purple-900/40 to-slate-900 border border-purple-800/40 p-3.5 rounded-2xl flex justify-between items-center shadow-md">
+                <div>
+                    <h4 class="text-xs font-bold text-purple-300">تسجيل الحضور اليومي 📅</h4>
+                    <p class="text-[10px] text-slate-400 mt-0.5">سجل يومياً واحصل على نقاط وألماس مجاني</p>
+                </div>
+                <button onclick="alert('تم تسجيل الحضور بنجاح اليوم! 🎁')" class="bg-purple-600 hover:bg-purple-700 px-3.5 py-2 rounded-xl text-xs font-bold shadow-md transition">تسجيل</button>
+            </div>
+
+            <!-- القوائم الداخلية -->
+            <div class="space-y-1.5 text-xs">
+                <div onclick="openGenericModal('modal-agency')" class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl flex justify-between items-center cursor-pointer hover:border-purple-600 transition shadow-sm"><span>🏰 وكالتي وإدارتها</span><span class="text-slate-500">›</span></div>
+                <div onclick="openGenericModal('modal-store')" class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl flex justify-between items-center cursor-pointer hover:border-purple-600 transition shadow-sm"><span>🛍️ متجر الإطارات والفقاعات</span><span class="text-slate-500">›</span></div>
+                <div onclick="openGenericModal('modal-tasks')" class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl flex justify-between items-center cursor-pointer hover:border-purple-600 transition shadow-sm"><span>📋 المهام اليومية والحصرية</span><span class="text-slate-500">›</span></div>
+                <div onclick="openGenericModal('modal-wallet')" class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl flex justify-between items-center cursor-pointer hover:border-purple-600 transition shadow-sm"><span>👛 المحفظة وشحن الألماس</span><span class="text-purple-400 font-bold">0 💎 ›</span></div>
+                <div onclick="openGenericModal('modal-family')" class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl flex justify-between items-center cursor-pointer hover:border-purple-600 transition shadow-sm"><span>🛡️ عائلتي المميزة</span><span class="text-slate-500">›</span></div>
+                <div onclick="openGenericModal('modal-settings')" class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl flex justify-between items-center cursor-pointer hover:border-purple-600 transition shadow-sm"><span>⚙️ الإعدادات العامة</span><span class="text-slate-500">›</span></div>
+            </div>
+        </div>
+
     </main>
 
+    <!-- ==================== نافذة غرفة الصوت الحقيقية المتكاملة ==================== -->
+    <div id="room-modal" class="fixed inset-0 bg-[#030007] z-60 hidden flex-col justify-between p-4">
+        <!-- رأس الغرفة -->
+        <div class="flex justify-between items-center bg-slate-900/80 p-3.5 rounded-2xl border border-slate-800 shadow-lg">
+            <div class="flex items-center space-x-2 space-x-reverse">
+                <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center font-bold text-xs shadow-md">🎙️</div>
+                <div>
+                    <h4 class="text-xs font-bold text-white" id="r-title">غرفة الدردشة الصوتية</h4>
+                    <p class="text-[9px] text-slate-400">المضيف: <span id="r-host">سارة</span> | الدولة: <span id="r-country">مصر</span></p>
+                </div>
+            </div>
+            <div class="flex space-x-2 space-x-reverse">
+                <button onclick="openGenericModal('modal-room-settings')" class="bg-slate-800 border border-slate-700 text-slate-300 px-3 py-1.5 rounded-xl text-xs font-bold shadow-md">⚙️ إعدادات</button>
+                <button onclick="closeVoiceRoom()" class="bg-red-500/20 border border-red-500/40 text-red-400 px-3 py-1.5 rounded-xl text-xs font-bold shadow-md">✕ خروج</button>
+            </div>
+        </div>
+
+        <!-- 8 مقاعد ميكروفونات تفاعلية -->
+        <div class="grid grid-cols-4 gap-3.5 my-auto py-4">
+            <div class="flex flex-col items-center space-y-1">
+                <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-purple-600 to-pink-500 border-2 border-purple-400 flex items-center justify-center text-lg font-bold shadow-xl relative">👑<span class="absolute -bottom-1 bg-green-500 w-3.5 h-3.5 rounded-full border-2 border-slate-900"></span></div>
+                <span class="text-[10px] text-slate-300 font-bold">المضيف</span>
+            </div>
+            <div class="flex flex-col items-center space-y-1">
+                <div class="w-14 h-14 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-lg text-slate-500 relative shadow-md">🎙️<span class="absolute -bottom-1 bg-green-500 w-3.5 h-3.5 rounded-full border-2 border-slate-900"></span></div>
+                <span class="text-[10px] text-slate-400">مقعد 2</span>
+            </div>
+            <div class="flex flex-col items-center space-y-1">
+                <div class="w-14 h-14 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-lg text-slate-500 relative shadow-md">🎙️</div>
+                <span class="text-[10px] text-slate-400">مقعد 3</span>
+            </div>
+            <div class="flex flex-col items-center space-y-1">
+                <div class="w-14 h-14 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-lg text-slate-500 relative shadow-md">🔒</div>
+                <span class="text-[10px] text-slate-400">مغلق</span>
+            </div>
+            <div class="flex flex-col items-center space-y-1">
+                <div class="w-14 h-14 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-lg text-slate-500 relative shadow-md">🎙️</div>
+                <span class="text-[10px] text-slate-400">مقعد 5</span>
+            </div>
+            <div class="flex flex-col items-center space-y-1">
+                <div class="w-14 h-14 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-lg text-slate-500 relative shadow-md">🎙️</div>
+                <span class="text-[10px] text-slate-400">مقعد 6</span>
+            </div>
+            <div class="flex flex-col items-center space-y-1">
+                <div class="w-14 h-14 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-lg text-slate-500 relative shadow-md">🎙️</div>
+                <span class="text-[10px] text-slate-400">مقعد 7</span>
+            </div>
+            <div class="flex flex-col items-center space-y-1">
+                <div class="w-14 h-14 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-lg text-slate-500 relative shadow-md">🎙️</div>
+                <span class="text-[10px] text-slate-400">مقعد 8</span>
+            </div>
+        </div>
+
+        <!-- شات الغرفة السفلي وأزرار الإرسال -->
+        <div class="space-y-2.5">
+            <div class="bg-slate-900/90 border border-slate-800 p-3 rounded-2xl h-28 overflow-y-auto text-[11px] space-y-1.5 text-slate-300 shadow-inner">
+                <p><span class="text-purple-400 font-bold">[نظام الغرفة]:</span> أهلاً بالجميع في الغرفة الصوتية، انضموا للميكروفون! ✨</p>
+                <p><span class="text-amber-400 font-bold">[دعم]:</span> تم إرسال هدية (وردة ذهبية) من أحمد إلى المضيف.</p>
+                <p><span class="text-cyan-400 font-bold">[محمد]:</span> مساكم عسل يا شباب، منورين السهرة.</p>
+            </div>
+            <div class="flex space-x-2 space-x-reverse">
+                <input type="text" placeholder="اكتب رسالة للغرفة..." class="flex-1 bg-slate-900 border border-slate-800 p-3 rounded-2xl text-xs text-white focus:outline-none focus:border-purple-500 shadow-md">
+                <button onclick="alert('تم إرسال الرسالة بنجاح')" class="bg-purple-600 px-4 py-2 rounded-2xl text-xs font-bold shadow-md transition">إرسال</button>
+                <button onclick="alert('تم إرسال الهدية بنجاح! 🎁')" class="bg-pink-600 px-4 py-2 rounded-2xl text-xs font-bold shadow-md transition">🎁 هدية</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== نافذة غرفة الألعاب المنفصلة ==================== -->
+    <div id="game-room-modal" class="fixed inset-0 bg-[#030007] z-60 hidden flex-col justify-between p-4">
+        <div class="flex justify-between items-center bg-slate-900/80 p-3.5 rounded-2xl border border-slate-800 shadow-lg">
+            <h4 class="text-xs font-bold text-amber-400" id="game-room-title">صالة الألعاب التفاعلية</h4>
+            <button onclick="closeGameRoom()" class="bg-red-500/20 border border-red-500/40 text-red-400 px-3.5 py-1.5 rounded-xl text-xs font-bold shadow-md">✕ خروج</button>
+        </div>
+        <div class="my-auto text-center space-y-4">
+            <div class="w-24 h-24 bg-gradient-to-tr from-purple-600 to-indigo-600 rounded-3xl mx-auto flex items-center justify-center text-4xl shadow-2xl neon-glow">🎮</div>
+            <h3 class="text-sm font-bold text-white">جارِ تحميل اللعبة وبدء الطاولة...</h3>
+            <p class="text-xs text-slate-400">يرجى الانتظار قليلاً ريثما يتم توصيلك بالمشاركين الآخرين.</p>
+        </div>
+        <button onclick="closeGameRoom()" class="w-full bg-slate-800 py-3 rounded-2xl text-xs font-bold shadow-md">إغلاق ورجوع</button>
+    </div>
+
+    <!-- ==================== النوافذ المنبثقة الشاملة والتفصيلية (Modals) ==================== -->
+
+    <!-- نافذة الوكالة -->
+    <div id="modal-agency" class="fixed inset-0 bg-slate-950/90 z-70 hidden flex justify-center items-center p-4">
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl w-full max-w-sm space-y-4 shadow-2xl">
+            <h3 class="font-black text-sm text-purple-400 text-center">إدارة الوكالة والانضمام 🏰</h3>
+            <p class="text-[11px] text-slate-400 leading-relaxed text-center">انضم إلى وكالتنا الرسمية واحصل على دعم أسبوعي ودخل إضافي من الألماس والدعم المستمر.</p>
+            <input type="text" placeholder="ادخل معرف الوكالة (ID)..." class="w-full bg-slate-950 border border-slate-800 p-3 rounded-2xl text-xs text-white focus:outline-none focus:border-purple-500">
+            <div class="flex space-x-2 space-x-reverse pt-2">
+                <button onclick="alert('تم إرسال طلب الانضمام للوكالة بنجاح!')" class="flex-1 bg-purple-600 py-3 rounded-xl text-xs font-bold shadow-md">انضمام الآن</button>
+                <button onclick="closeGenericModal('modal-agency')" class="flex-1 bg-slate-800 py-3 rounded-xl text-xs font-bold shadow-md">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة المتجر (المتجر الجديد) -->
+    <div id="modal-store" class="fixed inset-0 bg-slate-950/90 z-70 hidden flex justify-center items-center p-4">
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl w-full max-w-sm space-y-4 shadow-2xl">
+            <h3 class="font-black text-sm text-indigo-400 text-center">متجر الإطارات والفقاعات المميزة 🛍️</h3>
+            <div class="space-y-2.5 text-xs">
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center">
+                    <span>إطار التنين الذهبي المتحرك 🦁</span>
+                    <button onclick="alert('تم شراء الإطار بنجاح!')" class="bg-indigo-600 px-3 py-1.5 rounded-lg font-bold">500 💎</button>
+                </div>
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center">
+                    <span>فقاعة شات المجرة البنفسجية 🌌</span>
+                    <button onclick="alert('تم شراء الفقاعة بنجاح!')" class="bg-indigo-600 px-3 py-1.5 rounded-lg font-bold">300 💎</button>
+                </div>
+            </div>
+            <button onclick="closeGenericModal('modal-store')" class="w-full bg-slate-800 py-3 rounded-xl text-xs font-bold shadow-md">إغلاق</button>
+        </div>
+    </div>
+
+    <!-- نافذة إعدادات الغرفة الصوتية -->
+    <div id="modal-room-settings" class="fixed inset-0 bg-slate-950/90 z-70 hidden flex justify-center items-center p-4">
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl w-full max-w-sm space-y-4 shadow-2xl">
+            <h3 class="font-black text-sm text-purple-400 text-center">إعدادات الغرفة والتحكم ⚙️</h3>
+            <div class="space-y-2 text-xs">
+                <div onclick="alert('تم قفل الغرفة بكلمة مرور')" class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center cursor-pointer">
+                    <span>قفل الغرفة بكلمة مرور</span>
+                    <span class="text-slate-400">غير مفعل</span>
+                </div>
+                <div onclick="alert('تم كتم جميع المقاعد')" class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center cursor-pointer">
+                    <span>كتم جميع المقاعد</span>
+                    <span class="text-slate-400">إجراء</span>
+                </div>
+            </div>
+            <button onclick="closeGenericModal('modal-room-settings')" class="w-full bg-slate-800 py-3 rounded-xl text-xs font-bold shadow-md">إغلاق</button>
+        </div>
+    </div>
+
+    <!-- نافذة المهام -->
+    <div id="modal-tasks" class="fixed inset-0 bg-slate-950/90 z-70 hidden flex justify-center items-center p-4">
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl w-full max-w-sm space-y-4 shadow-2xl">
+            <h3 class="font-black text-sm text-amber-400 text-center">المهام اليومية والحصرية 📋</h3>
+            <div class="space-y-2.5 text-xs">
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center shadow-sm">
+                    <span>البقاء في الغرفة الصوتية (10 دقائق)</span>
+                    <span class="text-amber-400 font-bold">+20 💎</span>
+                </div>
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center shadow-sm">
+                    <span>لعب جولة في قسم الألعاب</span>
+                    <span class="text-amber-400 font-bold">+30 💎</span>
+                </div>
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center shadow-sm">
+                    <span>إرسال هدية لأحد الأصدقاء</span>
+                    <span class="text-amber-400 font-bold">+50 💎</span>
+                </div>
+            </div>
+            <button onclick="closeGenericModal('modal-tasks')" class="w-full bg-slate-800 py-3 rounded-xl text-xs font-bold shadow-md">إغلاق</button>
+        </div>
+    </div>
+
+    <!-- نافذة المحفظة والشحن -->
+    <div id="modal-wallet" class="fixed inset-0 bg-slate-950/90 z-70 hidden flex justify-center items-center p-4">
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl w-full max-w-sm space-y-4 shadow-2xl">
+            <h3 class="font-black text-sm text-purple-400 text-center">المحفظة والشحن السريع 👛</h3>
+            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-center space-y-1">
+                <span class="text-[10px] text-slate-400">رصيدك الحالي من الألماس</span>
+                <h2 class="text-2xl font-black text-purple-300">0 💎</h2>
+            </div>
+            <div class="space-y-2 text-xs">
+                <div onclick="alert('تم اختيار باقة 1000 الماس')" class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center cursor-pointer hover:border-purple-500">
+                    <span>1,000 ألماس 💎</span>
+                    <span class="text-purple-400 font-bold">$9.99</span>
+                </div>
+                <div onclick="alert('تم اختيار باقة 5000 الماس')" class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center cursor-pointer hover:border-purple-500">
+                    <span>5,000 ألماس 💎</span>
+                    <span class="text-purple-400 font-bold">$49.99</span>
+                </div>
+            </div>
+            <button onclick="closeGenericModal('modal-wallet')" class="w-full bg-slate-800 py-3 rounded-xl text-xs font-bold shadow-md">إغلاق</button>
+        </div>
+    </div>
+
+    <!-- نافذة العائلة -->
+    <div id="modal-family" class="fixed inset-0 bg-slate-950/90 z-70 hidden flex justify-center items-center p-4">
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl w-full max-w-sm space-y-4 shadow-2xl">
+            <h3 class="font-black text-sm text-amber-400 text-center">عائلتي المميزة 🛡️</h3>
+            <p class="text-[11px] text-slate-400 leading-relaxed text-center">أنشئ عائلتك الخاصة أو انضم إلى عائلة قوية لتحصل على درع وتفاعل حصري بين الأعضاء.</p>
+            <button onclick="alert('تم تقديم طلب إنشاء عائلة جديدة!')" class="w-full bg-amber-600 hover:bg-amber-700 py-3 rounded-xl text-xs font-bold shadow-md">إنشاء عائلة جديدة</button>
+            <button onclick="closeGenericModal('modal-family')" class="w-full bg-slate-800 py-3 rounded-xl text-xs font-bold shadow-md">إغلاق</button>
+        </div>
+    </div>
+
+    <!-- نافذة الإعدادات -->
+    <div id="modal-settings" class="fixed inset-0 bg-slate-950/90 z-70 hidden flex justify-center items-center p-4">
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl w-full max-w-sm space-y-4 shadow-2xl">
+            <h3 class="font-black text-sm text-slate-200 text-center">الإعدادات العامة ⚙️</h3>
+            <div class="space-y-2 text-xs">
+                <div onclick="alert('تم تغيير إعدادات الإشعارات')" class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center cursor-pointer">
+                    <span>إشعارات التطبيق والأصوات</span>
+                    <span class="text-green-400 font-bold">مفعل</span>
+                </div>
+                <div onclick="alert('تم مسح ذاكرة التخزين المؤقت بنجاح')" class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between items-center cursor-pointer">
+                    <span>مسح ذاكرة التخزين المؤقت</span>
+                    <span class="text-slate-400">14.2 MB</span>
+                </div>
+            </div>
+            <button onclick="closeGenericModal('modal-settings')" class="w-full bg-slate-800 py-3 rounded-xl text-xs font-bold shadow-md">إغلاق</button>
+        </div>
+    </div>
+
+    <!-- ==================== شريط التنقل السفلي (Navigation Bar) ==================== -->
+    <nav class="bg-[#030007] border-t border-purple-950/40 py-2.5 px-4 flex justify-between items-center z-30 text-[11px]">
+        <div onclick="switchTab('profile', 'أنا')" id="nav-profile" class="nav-btn flex flex-col items-center cursor-pointer text-slate-400 hover:text-purple-400 transition">
+            <span class="text-base">👤</span>
+            <span class="mt-0.5">انا</span>
+        </div>
+        <div onclick="switchTab('posts', 'المنشورات')" id="nav-posts" class="nav-btn flex flex-col items-center cursor-pointer text-slate-400 hover:text-purple-400 transition">
+            <span class="text-base">📰</span>
+            <span class="mt-0.5">المنشورات</span>
+        </div>
+        <div onclick="switchTab('messages', 'الرسائل')" id="nav-messages" class="nav-btn flex flex-col items-center cursor-pointer text-slate-400 hover:text-purple-400 transition">
+            <span class="text-base">💬</span>
+            <span class="mt-0.5">الرسائل</span>
+        </div>
+        <div onclick="switchTab('rooms', 'الغرف')" id="nav-rooms" class="nav-btn flex flex-col items-center cursor-pointer text-purple-400 font-bold">
+            <span class="text-base">🎙️</span>
+            <span class="mt-0.5">الغرف</span>
+        </div>
+        <div onclick="switchTab('games', 'الألعاب')" id="nav-games" class="nav-btn flex flex-col items-center cursor-pointer text-slate-400 hover:text-purple-400 transition">
+            <span class="text-base">🎮</span>
+            <span class="mt-0.5">الألعاب</span>
+        </div>
+    </nav>
+
+    <!-- ==================== أكواد الجافاسكريبت البرمجية (Logic) ==================== -->
     <script>
-        let currentUserEmail = "";
-        let currentRoomName = "الدردشة العامة 🌐";
-        let currentMaxSeats = 18;
-        let currentRoomOwner = "النظام"; // مالك الغرفة الحالية
-
-        const bannedWords = ["شتم", "قذارة", "نصب", "عنف", "حرب", "سفالة", "وسخ"];
-
-        function performGoogleLogin() {
-            const email = document.getElementById('googleEmail').value.trim();
-            const pass = document.getElementById('googlePass').value.trim();
-
-            if(!email.includes('@gmail.com') || pass.length < 4) {
-                alert("الرجاء إدخال بريد جوجل صحيح (يحتوي على @gmail.com) وكلمة مرور سليمة.");
-                return;
-            }
-
-            currentUserEmail = email;
-            document.getElementById('currentRoleDisplay').innerText = email.split('@')[0];
-            document.getElementById('loginScreen').style.display = 'none';
-            alert(`تم تسجيل الدخول بنجاح بحساب: ${email}`);
+        function selectLanguage(el) {
+            document.querySelectorAll('.lang-option').forEach(option => {
+                option.className = "lang-option bg-slate-900/90 border border-slate-800 p-4 rounded-2xl text-sm font-semibold cursor-pointer transition hover:border-purple-500";
+            });
+            el.className = "lang-option bg-slate-900 border border-purple-500 p-4 rounded-2xl text-sm font-bold text-purple-300 cursor-pointer shadow-lg shadow-purple-900/40";
         }
 
-        function toggleRoomModal() {
-            const modal = document.getElementById('roomModal');
-            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+        function proceedToLogin() {
+            document.getElementById('screen-lang').style.display = 'none';
+            document.getElementById('screen-login').style.display = 'flex';
         }
 
-        function submitCreateRoom() {
-            const nameInput = document.getElementById('newRoomName');
-            const seatsSelect = document.getElementById('newRoomSeats');
-            const roomName = nameInput.value.trim();
-            const maxSeats = seatsSelect.value;
-            const ownerName = currentUserEmail ? currentUserEmail.split('@')[0] : "مستخدم";
-
-            if(!roomName) {
-                alert("الرجاء كتابة اسم الغرفة.");
-                return;
-            }
-
-            for(let word of bannedWords) {
-                if(roomName.includes(word)) {
-                    alert("⚠️ تحذير: اسم الغرفة مخالف لقواعد المنصة وتم حظر الحساب!");
-                    document.body.innerHTML = '<div class="h-screen flex items-center justify-center text-center p-6 text-red-500 font-bold text-lg">تم حظر حسابك نهائياً لمخالفة سياسة المنصة.</div>';
-                    return;
-                }
-            }
-
-            const container = document.getElementById('roomsListContainer');
-            const newDiv = document.createElement('div');
-            newDiv.className = "room-tab bg-slate-900 border border-slate-800 text-slate-300 px-4 py-2.5 rounded-xl text-xs font-bold shrink-0 cursor-pointer shadow-md transition";
-            newDiv.innerText = `${roomName} (${maxSeats} مقعد)`;
-            newDiv.onclick = function() { switchRoom(roomName, maxSeats, ownerName); };
-            container.appendChild(newDiv);
-
-            nameInput.value = "";
-            toggleRoomModal();
-            switchRoom(roomName, maxSeats, ownerName);
-            alert(`تم إنشاء غرفة (${roomName}) وأنت الآن مالك الغرفة!`);
+        function backToLang() {
+            document.getElementById('screen-login').style.display = 'none';
+            document.getElementById('screen-lang').style.display = 'flex';
         }
 
-        function switchRoom(roomName, maxSeats, ownerName) {
-            currentRoomName = roomName;
-            currentMaxSeats = maxSeats;
-            currentRoomOwner = ownerName;
-            
-            document.getElementById('activeRoomTitle').innerText = `أنت الآن في: ${roomName} (المالك: ${ownerName})`;
-            document.getElementById('activeRoomSeatsInfo').innerText = `المقاعد: 1 / ${maxSeats}`;
-            
-            const chatBox = document.getElementById('chatBox');
-            const msgDiv = document.createElement('div');
-            msgDiv.className = "bg-slate-900 border border-slate-800 p-3 rounded-xl text-xs space-y-1 fade-in";
-            msgDiv.innerHTML = `<span class="font-bold text-purple-400">النظام 🤖</span><p class="text-slate-300">انتقلت إلى غرفة (${roomName}). مالك الغرفة هو (${ownerName}).</p>`;
-            chatBox.appendChild(msgDiv);
-            chatBox.scrollTop = chatBox.scrollHeight;
+        function executeLogin() {
+            document.getElementById('screen-login').style.display = 'none';
         }
 
-        function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const text = input.value.trim();
-            if(!text) return;
+        function switchTab(tabId, title) {
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById('pane-' + tabId).classList.add('active');
+            document.getElementById('topbar-title').innerText = title;
 
-            for(let word of bannedWords) {
-                if(text.includes(word)) {
-                    alert("🚨 تحذير أمني: تم رصد ألفاظ مخالفة وتم حظر الحساب فوراً!");
-                    document.body.innerHTML = '<div class="h-screen flex items-center justify-center text-center p-6 text-red-500 font-bold text-lg">تم حظر حسابك نهائياً لمخالفة معايير الأمان.</div>';
-                    return;
-                }
-            }
-
-            const chatBox = document.getElementById('chatBox');
-            const msgDiv = document.createElement('div');
-            msgDiv.className = "bg-slate-900 border border-slate-800 p-3 rounded-xl text-xs space-y-2 fade-in";
-            
-            const myName = currentUserEmail ? currentUserEmail.split('@')[0] : "زوار";
-            
-            let htmlContent = `<div class="flex justify-between items-center"><span class="font-bold text-purple-400">${myName}</span>`;
-            
-            // إذا كان المستخدم الحالي هو "مالك الغرفة"، يظهر له زر "حظر" بجانب أي رسالة في غرفته!
-            if (myName === currentRoomOwner && currentRoomOwner !== "النظام") {
-                htmlContent += `<button onclick="kickUser('${myName}')" class="bg-red-600/20 border border-red-500/30 text-red-400 px-2 py-0.5 rounded text-[10px] font-bold hover:bg-red-600 hover:text-white transition">حظر من الغرفة 🚫</button>`;
-            }
-            htmlContent += `</div><p class="text-slate-200">${text}</p>`;
-
-            msgDiv.innerHTML = htmlContent;
-            chatBox.appendChild(msgDiv);
-            chatBox.scrollTop = chatBox.scrollHeight;
-            input.value = "";
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.className = "nav-btn flex flex-col items-center cursor-pointer text-slate-400 hover:text-purple-400 transition";
+            });
+            document.getElementById('nav-' + tabId).className = "nav-btn flex flex-col items-center cursor-pointer text-purple-400 font-bold";
         }
 
-        function kickUser(userName) {
-            alert(`⚠️ تم حظر المستخدم بنجاح من قِبل مالك الغرفة (${currentRoomOwner})!`);
-            const chatBox = document.getElementById('chatBox');
-            const kickDiv = document.createElement('div');
-            kickDiv.className = "bg-red-950/40 border border-red-900/50 p-2 rounded-xl text-[11px] text-red-400 text-center font-bold fade-in";
-            kickDiv.innerText = `تم طرد وحظر أحد المستخدمين من قِبل مالك الغرفة.`;
-            chatBox.appendChild(kickDiv);
-            chatBox.scrollTop = chatBox.scrollHeight;
+        function openGenericModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+
+        function closeGenericModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function openVoiceRoom(title, count, host, country) {
+            document.getElementById('r-title').innerText = title;
+            document.getElementById('r-host').innerText = host;
+            document.getElementById('r-country').innerText = country;
+            document.getElementById('room-modal').style.display = 'flex';
+        }
+
+        function closeVoiceRoom() {
+            document.getElementById('room-modal').style.display = 'none';
+        }
+
+        function openGameRoom(gameName) {
+            document.getElementById('game-room-title').innerText = gameName;
+            document.getElementById('game-room-modal').style.display = 'flex';
+        }
+
+        function closeGameRoom() {
+            document.getElementById('game-room-modal').style.display = 'none';
         }
     </script>
 </body>
