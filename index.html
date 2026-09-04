@@ -46,20 +46,6 @@
             color: var(--accent-color);
         }
 
-        nav button {
-            background: none;
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        nav button:hover {
-            background-color: var(--border-color);
-        }
-
         main {
             flex: 1;
             max-width: 1200px;
@@ -243,37 +229,34 @@
 <body>
 
     <header>
-        <div class="logo">🎬 منصة اللقطات</div>
-        <nav id="main-nav">
-            <button id="nav-login-btn" onclick="switchView('auth-view')">تسجيل الدخول</button>
-        </nav>
+        <div class="logo">🎬 عروض الأفلام القصيرة</div>
     </header>
 
     <main>
         <div id="auth-view" class="auth-container active-view">
             <div class="form-card">
-                <h2>تسجيل الدخول</h2>
+                <h2>تسجيل الدخول للمشاهدة</h2>
                 <div class="input-group">
                     <label>البريد الإلكتروني</label>
-                    <input type="email" id="login-email" placeholder="أدخل الإيميل...">
+                    <input type="email" id="login-email" placeholder="أدخل أي إيميل...">
                 </div>
                 <div class="input-group">
                     <label>كلمة المرور</label>
                     <input type="password" id="login-password" placeholder="أدخل كلمة المرور...">
                 </div>
-                <button class="btn" onclick="handleLogin()">دخول للنظام</button>
+                <button class="btn" onclick="handleLogin()">دخول للمنصة</button>
             </div>
         </div>
 
         <div id="admin-view" class="dashboard-container">
-            <h2>لوحة تحكم المطور</h2>
-            <p style="color: var(--text-muted); margin-bottom: 2rem;">مرحباً بك يا محمد (المطور الأساسي). التحكم الكامل في الغرف والفيديوهات وحظر المستخدمين.</p>
+            <h2>لوحة إدارة الفيديوهات</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">مرحباً بك يا محمد (المسؤول). يمكنك نشر أجزاء الأفلام والتحكم في المتابعين.</p>
             
             <div class="dashboard-section">
-                <h3>إضافة فيديو / جزء جديد</h3>
+                <h3>نشر جزء فيلم جديد</h3>
                 <div class="form-card" style="max-width: 100%; margin: 0; background-color: var(--card-bg);">
                     <div class="input-group">
-                        <label>عنوان الفيلم أو الغرفة</label>
+                        <label>عنوان الفيلم</label>
                         <input type="text" id="admin-room-title" placeholder="مثال: فيلم الأكشن الخطير">
                     </div>
                     <div class="input-group">
@@ -289,7 +272,7 @@
             </div>
 
             <div class="dashboard-section">
-                <h3>إدارة المستخدمين والحظر</h3>
+                <h3>إدارة المستخدمين والمحظورين</h3>
                 <table id="users-table">
                     <thead>
                         <tr>
@@ -308,15 +291,15 @@
 
         <div id="feed-view" class="feed-container">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <h2>غرف الأفلام المتاحة</h2>
-                <button class="btn" style="width: auto; padding: 0.5rem 1rem;" onclick="logout()">خروج</button>
+                <h2>قائمة الأفلام المتوفرة</h2>
+                <button class="btn" style="width: auto; padding: 0.5rem 1rem;" onclick="logout()">تسجيل الخروج</button>
             </div>
             <div id="rooms-grid" class="rooms-grid">
             </div>
         </div>
 
         <div id="stream-view" class="feed-container">
-            <button class="btn" style="width: auto; padding: 0.5rem 1rem; margin-bottom: 1rem;" onclick="backToRooms()">← الرجوع للغرف</button>
+            <button class="btn" style="width: auto; padding: 0.5rem 1rem; margin-bottom: 1rem;" onclick="backToRooms()">← الرجوع لقائمة الأفلام</button>
             <div class="video-stream-container">
                 <div class="video-player-wrapper">
                     <video id="active-video" controls autoplay loop>
@@ -337,14 +320,10 @@
     </main>
 
     <script>
-        const DEFAULT_ADMIN_EMAIL = "jehejfkfbw@gmail.com";
-        const DEFAULT_ADMIN_PASS = "ddee4dab";
+        const ADMIN_EMAIL = "jehejfkfbw@gmail.com";
+        const ADMIN_PASS = "ddee4dab";
 
-        let users = JSON.parse(localStorage.getItem('site_users')) || [
-            { id: 1, email: DEFAULT_ADMIN_EMAIL, password: DEFAULT_ADMIN_PASS, isAdmin: true, isBanned: false },
-            { id: 2, email: "user@test.com", password: "123", isAdmin: false, isBanned: false }
-        ];
-
+        let users = JSON.parse(localStorage.getItem('site_users')) || [];
         let videos = JSON.parse(localStorage.getItem('site_videos')) || [
             { id: 1, roomTitle: "فيلم الهروب الكبير", partNumber: 1, url: "https://www.w3schools.com/html/mov_bbb.mp4" },
             { id: 2, roomTitle: "فيلم الهروب الكبير", partNumber: 2, url: "https://www.w3schools.com/html/movie.mp4" },
@@ -386,17 +365,25 @@
             const emailInput = document.getElementById('login-email').value.trim();
             const passInput = document.getElementById('login-password').value.trim();
 
-            let targetUser = users.find(u => u.email === emailInput && u.password === passInput);
-
-            if (!targetUser && emailInput === DEFAULT_ADMIN_EMAIL && passInput === DEFAULT_ADMIN_PASS) {
-                targetUser = { id: Date.now(), email: emailInput, password: passInput, isAdmin: true, isBanned: false };
-                users.push(targetUser);
-                localStorage.setItem('site_users', JSON.stringify(users));
+            if (!emailInput) {
+                alert("الرجاء كتابة البريد الإلكتروني.");
+                return;
             }
 
+            let targetUser;
+            let isAdmin = false;
+
+            if (emailInput === ADMIN_EMAIL && passInput === ADMIN_PASS) {
+                isAdmin = true;
+            }
+
+            targetUser = users.find(u => u.email === emailInput);
             if (!targetUser) {
-                alert("البريد الإلكتروني أو كلمة المرور غير صحيحة!");
-                return;
+                targetUser = { id: Date.now(), email: emailInput, isAdmin: isAdmin, isBanned: false };
+                users.push(targetUser);
+                localStorage.setItem('site_users', JSON.stringify(users));
+            } else {
+                if (isAdmin) targetUser.isAdmin = true;
             }
 
             if (targetUser.isBanned) {
@@ -431,7 +418,7 @@
                     <td>${u.email}</td>
                     <td><span class="badge ${u.isBanned ? 'badge-banned' : 'badge-active'}">${u.isBanned ? 'محظور' : 'نشط'}</span></td>
                     <td>
-                        ${!u.isAdmin ? `<button class="btn btn-danger" style="padding: 0.25rem 0.5rem; width: auto;" onclick="toggleBan(${u.id})">${u.isBanned ? 'إلغاء الحظر' : 'حظر / طرد'}</button>` : 'مطور النظام'}
+                        ${!u.isAdmin ? `<button class="btn btn-danger" style="padding: 0.25rem 0.5rem; width: auto;" onclick="toggleBan(${u.id})">${u.isBanned ? 'إلغاء الحظر' : 'حظر / طرد'}</button>` : 'المسؤول الأساسي'}
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -476,7 +463,7 @@
             });
 
             if (Object.keys(roomsMap).length === 0) {
-                grid.innerHTML = '<p style="color: var(--text-muted);">لا توجد أفلام أو غرف متاحة حالياً.</p>';
+                grid.innerHTML = '<p style="color: var(--text-muted);">لا توجد أجزاء متاحة حالياً.</p>';
                 return;
             }
 
