@@ -283,7 +283,7 @@
     <header>
         <div class="logo">🎬 عروض الأفلام القصيرة</div>
         <div id="header-nav" class="nav-links" style="display: none;">
-            <button id="admin-nav-btn" onclick="switchView('admin-view'); renderAdminDashboard();" style="display: none;">لوحة المطور</button>
+            <button id="admin-nav-btn" onclick="openAdminPanel()" style="display: none;">لوحة المطور</button>
             <button onclick="switchView('feed-view'); renderRooms();">الأفلام</button>
             <button onclick="logout()">خروج</button>
         </div>
@@ -297,7 +297,7 @@
                 <div id="auth-msg" class="app-alert"></div>
                 <div class="input-group">
                     <label>البريد الإلكتروني</label>
-                    <input type="email" id="login-email" placeholder="أدخل أي إيميل...">
+                    <input type="email" id="login-email" placeholder="أدخل إيميلك...">
                 </div>
                 <div class="input-group">
                     <label>كلمة المرور</label>
@@ -310,10 +310,10 @@
         <!-- لوحة تحكم المطور -->
         <div id="admin-view" class="dashboard-container">
             <h2>لوحة إدارة الفيديوهات والمستخدمين</h2>
-            <p style="color: var(--text-muted); margin-bottom: 2rem;">مرحباً بك يا محمد. أنشئ الأفلام وارفع أجزائها من جهازك وحظر المزعجين.</p>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">مرحباً بك يا محمد. التحكم الكامل للمطور فقط.</p>
             
             <div class="dashboard-section">
-                <h3>إنشاء فيلم جديد ورفع أجزائه</h3>
+                <h3>إنشاء فيلم جديد ورفع أجزائه من الجهاز</h3>
                 <div class="form-card" style="max-width: 100%; margin: 0; background-color: var(--card-bg);">
                     <div id="admin-msg" class="app-alert"></div>
                     <div class="input-group">
@@ -321,7 +321,7 @@
                         <input type="text" id="admin-room-title" placeholder="مثال: فيلم الأكشن الخطير">
                     </div>
                     <div class="input-group">
-                        <label>صورة الغلاف (Poster)</label>
+                        <label>صورة الغلاف للفيلم (من الجهاز)</label>
                         <input type="file" id="admin-poster-file" accept="image/*" style="padding: 0.5rem; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-color);">
                     </div>
                     <div class="input-group">
@@ -333,10 +333,10 @@
                         <input type="number" id="admin-part-num" placeholder="1">
                     </div>
                     <div class="input-group">
-                        <label>ملف الفيديو (من اللابتوب أو التليفون)</label>
+                        <label>ملف فيديو الجزء (اختر من اللابتوب أو التليفون)</label>
                         <input type="file" id="admin-video-file" accept="video/mp4,video/*" style="padding: 0.5rem; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-color);">
                     </div>
-                    <button class="btn" onclick="adminAddVideoPart()">إنشاء ونشر الجزء</button>
+                    <button class="btn" onclick="adminAddVideoPart()">إنشاء ونشر الجزء من الجهاز</button>
                 </div>
             </div>
 
@@ -405,7 +405,7 @@
         const ADMIN_PASS = "ddee4dab";
 
         let users = JSON.parse(localStorage.getItem('site_users')) || [];
-        let roomsMeta = JSON.parse(localStorage.getItem('site_rooms_meta')) || {}; // تخزين تفاصيل الصورة وعدد الأجزاء
+        let roomsMeta = JSON.parse(localStorage.getItem('site_rooms_meta')) || {};
         let videos = JSON.parse(localStorage.getItem('site_videos')) || [];
 
         let currentUser = JSON.parse(localStorage.getItem('current_user')) || null;
@@ -415,7 +415,6 @@
 
         window.onload = function() {
             if (currentUser) {
-                // التحقق الفعلي من الحظر لكل مستخدم عند فتح الموقع
                 let freshUser = users.find(u => u.email === currentUser.email);
                 if (freshUser && freshUser.isBanned) {
                     showCustomAlert('auth-msg', 'حسابك محظور من قبل الإدارة.', 'error');
@@ -423,14 +422,16 @@
                     return;
                 }
                 document.getElementById('header-nav').style.display = 'flex';
-                if (currentUser.isAdmin) {
+                
+                // تحقق قاطع من صلاحية المطور
+                if (currentUser.email === ADMIN_EMAIL) {
                     document.getElementById('admin-nav-btn').style.display = 'block';
-                    switchView('admin-view');
-                    renderAdminDashboard();
                 } else {
-                    switchView('feed-view');
-                    renderRooms();
+                    document.getElementById('admin-nav-btn').style.display = 'none';
                 }
+
+                switchView('feed-view');
+                renderRooms();
             } else {
                 switchView('auth-view');
                 document.getElementById('header-nav').style.display = 'none';
@@ -449,10 +450,23 @@
         }
 
         function switchView(viewId) {
+            if (viewId === 'admin-view' && (!currentUser || currentUser.email !== ADMIN_EMAIL)) {
+                alert("غير مسموح لك بالدخول إلى هذه اللوحة!");
+                return;
+            }
             document.querySelectorAll('.auth-container, .dashboard-container, .feed-container').forEach(el => {
                 el.classList.remove('active-view');
             });
             document.getElementById(viewId).classList.add('active-view');
+        }
+
+        function openAdminPanel() {
+            if (currentUser && currentUser.email === ADMIN_EMAIL) {
+                switchView('admin-view');
+                renderAdminDashboard();
+            } else {
+                alert("غير مسموح!");
+            }
         }
 
         function handleLogin() {
@@ -464,20 +478,19 @@
                 return;
             }
 
-            let targetUser;
-            let isAdmin = false;
-
-            if (emailInput === ADMIN_EMAIL && passInput === ADMIN_PASS) {
-                isAdmin = true;
+            let targetUser = users.find(u => u.email === emailInput);
+            
+            // لو الإيميل هو إيميل المطور، لازم الباسورد يكون صح تماماً
+            if (emailInput === ADMIN_EMAIL) {
+                if (passInput !== ADMIN_PASS) {
+                    showCustomAlert('auth-msg', 'كلمة مرور المطور غير صحيحة!', 'error');
+                    return;
+                }
             }
 
-            targetUser = users.find(u => u.email === emailInput);
             if (!targetUser) {
-                targetUser = { id: Date.now(), email: emailInput, isAdmin: isAdmin, isBanned: false };
+                targetUser = { id: Date.now(), email: emailInput, isBanned: false };
                 users.push(targetUser);
-                localStorage.setItem('site_users', JSON.stringify(users));
-            } else {
-                if (isAdmin) targetUser.isAdmin = true;
                 localStorage.setItem('site_users', JSON.stringify(users));
             }
 
@@ -490,14 +503,14 @@
             localStorage.setItem('current_user', JSON.stringify(currentUser));
             document.getElementById('header-nav').style.display = 'flex';
 
-            if (currentUser.isAdmin) {
+            if (currentUser.email === ADMIN_EMAIL) {
                 document.getElementById('admin-nav-btn').style.display = 'block';
-                switchView('admin-view');
-                renderAdminDashboard();
             } else {
-                switchView('feed-view');
-                renderRooms();
+                document.getElementById('admin-nav-btn').style.display = 'none';
             }
+
+            switchView('feed-view');
+            renderRooms();
         }
 
         function logout() {
@@ -508,6 +521,8 @@
         }
 
         function renderAdminDashboard() {
+            if (!currentUser || currentUser.email !== ADMIN_EMAIL) return;
+
             const usersTbody = document.querySelector('#users-table tbody');
             usersTbody.innerHTML = '';
             users.forEach(u => {
@@ -516,7 +531,7 @@
                     <td>${u.email}</td>
                     <td><span class="badge ${u.isBanned ? 'badge-banned' : 'badge-active'}">${u.isBanned ? 'محظور فعلياً' : 'نشط'}</span></td>
                     <td>
-                        ${!u.isAdmin ? `<button class="btn btn-danger" style="padding: 0.25rem 0.5rem; width: auto;" onclick="toggleBan(${u.id})">${u.isBanned ? 'إلغاء الحظر' : 'حظر المستخدم'}</button>` : 'المسؤول الأساسي'}
+                        ${u.email !== ADMIN_EMAIL ? `<button class="btn btn-danger" style="padding: 0.25rem 0.5rem; width: auto;" onclick="toggleBan(${u.id})">${u.isBanned ? 'إلغاء الحظر' : 'حظر المستخدم'}</button>` : 'المسؤول الأساسي'}
                     </td>
                 `;
                 usersTbody.appendChild(tr);
@@ -540,6 +555,8 @@
         }
 
         function adminAddVideoPart() {
+            if (!currentUser || currentUser.email !== ADMIN_EMAIL) return;
+
             const roomTitle = document.getElementById('admin-room-title').value.trim();
             const totalParts = document.getElementById('admin-total-parts').value.trim();
             const partNum = parseInt(document.getElementById('admin-part-num').value);
@@ -547,17 +564,16 @@
             const videoFile = document.getElementById('admin-video-file').files[0];
 
             if (!roomTitle || !totalParts || !partNum || !videoFile) {
-                showCustomAlert('admin-msg', 'الرجاء ملء اسم الفيلم، إجمالي الأجزاء، رقم الجزء، واختيار ملف الفيديو.', 'error');
+                showCustomAlert('admin-msg', 'الرجاء ملء اسم الفيلم، إجمالي الأجزاء، رقم الجزء، واختيار ملف الفيديو من الجهاز.', 'error');
                 return;
             }
 
-            showCustomAlert('admin-msg', 'جاري معالجة الملفات ورفعها...', 'success');
+            showCustomAlert('admin-msg', 'جاري قراءة ومعالجة الملفات من جهازك...', 'success');
 
             const readerVideo = new FileReader();
             readerVideo.onload = function(eVideo) {
                 const videoBase64 = eVideo.target.result;
 
-                // لو تم اختيار صورة غلاف جديدة، نقوم بمعالجتها، وإلا نستخدم القديمة أو صورة افتراضية
                 if (posterFile) {
                     const readerPoster = new FileReader();
                     readerPoster.onload = function(ePoster) {
@@ -584,7 +600,7 @@
             videos.push({ id: Date.now(), roomTitle, partNumber: partNum, url: videoUrl });
             localStorage.setItem('site_videos', JSON.stringify(videos));
             
-            showCustomAlert('admin-msg', 'تم إنشاء ونشر الجزء بنجاح!', 'success');
+            showCustomAlert('admin-msg', 'تم رفع ونشر الجزء من الجهاز بنجاح!', 'success');
             document.getElementById('admin-room-title').value = '';
             document.getElementById('admin-total-parts').value = '';
             document.getElementById('admin-part-num').value = '';
@@ -594,6 +610,7 @@
         }
 
         function deleteVideo(videoId) {
+            if (!currentUser || currentUser.email !== ADMIN_EMAIL) return;
             if (confirm("هل أنت متأكد من حذف هذا الجزء؟")) {
                 videos = videos.filter(v => v.id !== videoId);
                 localStorage.setItem('site_videos', JSON.stringify(videos));
@@ -603,8 +620,9 @@
         }
 
         function toggleBan(userId) {
+            if (!currentUser || currentUser.email !== ADMIN_EMAIL) return;
             const user = users.find(u => u.id === userId);
-            if (user) {
+            if (user && user.email !== ADMIN_EMAIL) {
                 user.isBanned = !user.isBanned;
                 localStorage.setItem('site_users', JSON.stringify(users));
                 renderAdminDashboard();
