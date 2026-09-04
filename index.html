@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سهرة لايف 🌟</title>
+    <title>سهرة لايف - الغرف والتحكم 🌟</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { user-select: none; -webkit-tap-highlight-color: transparent; }
@@ -17,53 +17,48 @@
 </head>
 <body class="bg-slate-950 text-white h-screen flex flex-col justify-between max-w-md mx-auto border-x border-slate-800 shadow-2xl relative overflow-hidden">
 
-    <!-- شاشة تسجيل الدخول مع رسالة الترحيب المطلوبة -->
+    <!-- شاشة تسجيل الدخول بحساب جوجل (إيميل وباسورد) -->
     <div id="loginScreen" class="fixed inset-0 bg-slate-950 z-50 flex flex-col items-center justify-center p-6 text-center">
-        <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl w-full shadow-2xl space-y-5">
-            <div class="text-4xl">💎🎙️</div>
-            <h1 class="text-2xl font-black text-purple-400">مرحباً بك في سهرة لايف</h1>
-            <p class="text-xs text-slate-400 leading-relaxed">منصة الدردشة، الغرف الحية، والوكالات. سجل دخولك الآن بحساب جوجل للبدء!</p>
-            <button onclick="loginWithGoogle()" class="w-full bg-white hover:bg-slate-100 text-slate-950 py-3.5 rounded-xl font-bold text-sm transition shadow-lg flex items-center justify-center space-x-2 space-x-reverse active:scale-95">
-                <span>🌐</span>
-                <span>تسجيل الدخول بحساب جوجل</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- نافذة الجواهر والمتجر (الشمال) -->
-    <div id="jewelsModal" class="fixed inset-0 bg-slate-950/95 z-40 hidden flex flex-col p-4 overflow-y-auto">
-        <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
-            <h2 class="font-bold text-lg text-cyan-400">💎 رصيد الجواهر والأرباح</h2>
-            <button onclick="toggleJewelsModal()" class="bg-slate-800 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300">إغلاق ✕</button>
-        </div>
-        
-        <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl mb-4 text-center shadow-inner space-y-2">
-            <p class="text-xs text-slate-400">رصيدك الحالي:</p>
-            <p class="text-3xl font-black text-cyan-400"><span id="userJewels">30</span> جوهرة 💎</p>
-            <button onclick="claimDailyBonus()" id="dailyBtn" class="bg-cyan-600 hover:bg-cyan-700 w-full py-2 rounded-xl text-xs font-bold transition">استلم 30 جوهرة اليومية المجانية 🎁</button>
-        </div>
-
-        <div class="space-y-3 pb-6">
-            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2">
-                <h3 class="font-bold text-sm text-yellow-400">💸 سحب الأرباح (كل 5000 جوهرة = 10 دولار)</h3>
-                <p class="text-xs text-slate-400">يتم التحويل عبر فودافون كاش على الرقم الأساسي: <span class="text-white font-bold">01213783090</span></p>
-                <button onclick="requestWithdraw()" class="w-full bg-yellow-600 hover:bg-yellow-700 py-2 rounded-xl text-xs font-bold transition">طلب سحب الأرباح 💵</button>
-            </div>
+        <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl w-full shadow-2xl space-y-4">
+            <div class="text-4xl">🌐💎</div>
+            <h1 class="text-xl font-black text-purple-400">مرحباً بك في سهرة لايف</h1>
+            <p class="text-xs text-slate-400">سجل دخولك بحساب جوجل للمتابعة والدخول إلى الغرف والألعاب.</p>
             
-            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2">
-                <h3 class="font-bold text-sm text-purple-400">⚡ شحن الجواهر</h3>
-                <p class="text-xs text-slate-400">لشحن رصيدك واستخدامه في الغرف والوكالات تواصل مع الدعم الفني أو حول على الرقم المعتمد.</p>
+            <div class="space-y-3 pt-2 text-right">
+                <div>
+                    <label class="text-[10px] text-slate-400 block mb-1">البريد الإلكتروني (Google Email)</label>
+                    <input type="email" id="googleEmail" placeholder="name@gmail.com" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-xs text-white focus:outline-none focus:border-purple-500">
+                </div>
+                <div>
+                    <label class="text-[10px] text-slate-400 block mb-1">كلمة المرور (Password)</label>
+                    <input type="password" id="googlePass" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-xs text-white focus:outline-none focus:border-purple-500">
+                </div>
+                <button onclick="performGoogleLogin()" class="w-full bg-white hover:bg-slate-100 text-slate-950 py-3 rounded-xl font-bold text-xs transition shadow-lg mt-2 active:scale-95">
+                    تسجيل الدخول بحساب جوجل 🚀
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- نافذة إنشاء غرفة جديدة أو وكالة مع فلترة المحتوى السيئ -->
+    <!-- نافذة إنشاء غرفة جديدة -->
     <div id="roomModal" class="fixed inset-0 bg-slate-950/95 z-40 hidden flex flex-col p-4 justify-center items-center">
         <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl w-full max-w-sm space-y-4 shadow-2xl">
-            <h2 class="font-bold text-lg text-purple-400 text-center">إنشاء غرفة / وكالة جديدة 🎙️</h2>
-            <input type="text" id="roomNameInput" placeholder="اكتب اسم الغرفة أو الوكالة..." class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm text-white focus:outline-none focus:border-purple-500">
-            <div class="flex space-x-2 space-x-reverse">
-                <button onclick="createRoom()" class="flex-1 bg-purple-600 hover:bg-purple-700 py-2.5 rounded-xl text-xs font-bold transition">إنشاء</button>
+            <h2 class="font-bold text-lg text-purple-400 text-center">إنشاء غرفة دردشة جديدة 🎙️</h2>
+            <div>
+                <label class="text-[10px] text-slate-400 block mb-1">اسم الغرفة</label>
+                <input type="text" id="newRoomName" placeholder="مثال: سهرة الشباب، غرفة العاب..." class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-xs text-white focus:outline-none focus:border-purple-500">
+            </div>
+            <div>
+                <label class="text-[10px] text-slate-400 block mb-1">عدد المقاعد المتاحة (من 12 إلى 18)</label>
+                <select id="newRoomSeats" class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-xs text-white focus:outline-none focus:border-purple-500">
+                    <option value="12">12 مقعداً</option>
+                    <option value="14">14 مقعداً</option>
+                    <option value="16">16 مقعداً</option>
+                    <option value="18" selected>18 مقعداً</option>
+                </select>
+            </div>
+            <div class="flex space-x-2 space-x-reverse pt-2">
+                <button onclick="submitCreateRoom()" class="flex-1 bg-purple-600 hover:bg-purple-700 py-2.5 rounded-xl text-xs font-bold transition">إنشاء ودخول</button>
                 <button onclick="toggleRoomModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 py-2.5 rounded-xl text-xs font-bold transition">إلغاء</button>
             </div>
         </div>
@@ -71,54 +66,70 @@
 
     <!-- رأس التطبيق -->
     <header class="bg-slate-900 border-b border-slate-800 p-4 flex justify-between items-center z-10">
-        <button onclick="toggleJewelsModal()" class="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-xl text-xs font-bold text-cyan-400 flex items-center space-x-1 space-x-reverse hover:bg-slate-800 transition">
-            <span>💎</span>
-            <span><span id="headerJewels">30</span> جوهرة</span>
-        </button>
+        <div class="flex items-center space-x-2 space-x-reverse">
+            <span class="text-xs font-bold text-cyan-400 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800" id="currentRoleDisplay">حسابي</span>
+        </div>
         <div class="text-sm font-black text-purple-400">سهرة لايف 🌟</div>
         <button onclick="toggleRoomModal()" class="bg-purple-600/20 border border-purple-500/30 px-3 py-1.5 rounded-xl text-xs font-bold text-purple-300 hover:bg-purple-600/30 transition">
-            + غرفة
+            + إنشاء غرفة
         </button>
     </header>
 
-    <!-- محتوى الشات العام والغرف -->
-    <main class="flex-1 p-4 flex flex-col space-y-4 overflow-hidden">
-        <div class="flex space-x-2 space-x-reverse overflow-x-auto pb-1" id="roomsListContainer">
-            <div class="bg-purple-600 text-white px-4 py-2 rounded-xl text-xs font-bold shrink-0 cursor-pointer">الدردشة العامة 🌐</div>
-            <div class="bg-slate-900 border border-slate-800 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold shrink-0 cursor-pointer">وكالة السهرة 👑</div>
-        </div>
-
-        <!-- صندوق الرسائل -->
-        <div id="chatBox" class="flex-1 bg-slate-900/50 border border-slate-800/80 rounded-2xl p-4 overflow-y-auto space-y-3">
-            <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-xs space-y-1">
-                <span class="font-bold text-purple-400">نظام السيستم الآلي 🤖</span>
-                <p class="text-slate-300">أهلاً بك في سهرة لايف! النظام يراقب المحتوى تلقائياً؛ أي كلمة خارجة أو مخالفة تعرض حسابك للحظر الفوري.</p>
+    <!-- محتوى التطبيق -->
+    <main class="flex-1 p-4 flex flex-col space-y-3 overflow-hidden">
+        
+        <!-- قائمة الغرف المتاحة للانضمام -->
+        <div>
+            <p class="text-[11px] font-bold text-slate-400 mb-2">الغرف المتاحة حالياً:</p>
+            <div class="flex space-x-2 space-x-reverse overflow-x-auto pb-1" id="roomsListContainer">
+                <div onclick="switchRoom('الدردشة العامة 🌐', 18, 'النظام')" class="room-tab bg-purple-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold shrink-0 cursor-pointer shadow-md transition">
+                    الدردشة العامة (18 مقعد)
+                </div>
             </div>
         </div>
 
-        <!-- صندوق الكتابة والرقابة -->
+        <!-- معلومات الغرفة الحالية والمقاعد -->
+        <div class="bg-slate-900/80 border border-slate-800 px-4 py-2.5 rounded-xl flex justify-between items-center text-xs">
+            <span id="activeRoomTitle" class="font-bold text-purple-300">أنت الآن في: الدردشة العامة 🌐</span>
+            <span class="bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 text-cyan-400 font-bold" id="activeRoomSeatsInfo">المقاعد: 1 / 18</span>
+        </div>
+
+        <!-- صندوق الرسائل والشات -->
+        <div id="chatBox" class="flex-1 bg-slate-900/40 border border-slate-800/80 rounded-2xl p-4 overflow-y-auto space-y-3">
+            <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-xs space-y-1">
+                <span class="font-bold text-purple-400">نظام السيستم الآلي 🤖</span>
+                <p class="text-slate-300">أهلاً بك في سهرة لايف. إذا أنشأت غرفة، يمكنك حظر أي شخص مزعج يكتب رسائل مخالفة بضغط زر الحظر.</p>
+            </div>
+        </div>
+
+        <!-- صندوق الكتابة وإرسال الرسائل -->
         <div class="flex space-x-2 space-x-reverse">
-            <input type="text" id="messageInput" placeholder="اكتب رسالتك أو تفاعل في الغرفة..." class="flex-1 bg-slate-900 border border-slate-800 p-3 rounded-xl text-xs text-white focus:outline-none focus:border-purple-500">
+            <input type="text" id="messageInput" placeholder="اكتب رسالتك..." class="flex-1 bg-slate-900 border border-slate-800 p-3 rounded-xl text-xs text-white focus:outline-none focus:border-purple-500">
             <button onclick="sendMessage()" class="bg-purple-600 hover:bg-purple-700 px-5 rounded-xl text-xs font-bold transition active:scale-95">إرسال 🚀</button>
         </div>
     </main>
 
     <script>
-        let userJewels = 30;
-        let userName = "";
-        let hasClaimedDaily = false;
+        let currentUserEmail = "";
+        let currentRoomName = "الدردشة العامة 🌐";
+        let currentMaxSeats = 18;
+        let currentRoomOwner = "النظام"; // مالك الغرفة الحالية
 
         const bannedWords = ["شتم", "قذارة", "نصب", "عنف", "حرب", "سفالة", "وسخ"];
 
-        function loginWithGoogle() {
-            userName = prompt("أدخل اسم المستخدم الخاص بك لتأكيد ربط حساب جوجل:") || "مستخدم جديد";
-            if(userName.trim() === "") userName = "مستخدم جديد";
-            document.getElementById('loginScreen').style.display = 'none';
-        }
+        function performGoogleLogin() {
+            const email = document.getElementById('googleEmail').value.trim();
+            const pass = document.getElementById('googlePass').value.trim();
 
-        function toggleJewelsModal() {
-            const modal = document.getElementById('jewelsModal');
-            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+            if(!email.includes('@gmail.com') || pass.length < 4) {
+                alert("الرجاء إدخال بريد جوجل صحيح (يحتوي على @gmail.com) وكلمة مرور سليمة.");
+                return;
+            }
+
+            currentUserEmail = email;
+            document.getElementById('currentRoleDisplay').innerText = email.split('@')[0];
+            document.getElementById('loginScreen').style.display = 'none';
+            alert(`تم تسجيل الدخول بنجاح بحساب: ${email}`);
         }
 
         function toggleRoomModal() {
@@ -126,53 +137,53 @@
             modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
         }
 
-        function claimDailyBonus() {
-            if(hasClaimedDaily) {
-                alert("لقد استلمت هدية الـ 30 جوهرة اليومية بالفعل، انتظر للغد!");
+        function submitCreateRoom() {
+            const nameInput = document.getElementById('newRoomName');
+            const seatsSelect = document.getElementById('newRoomSeats');
+            const roomName = nameInput.value.trim();
+            const maxSeats = seatsSelect.value;
+            const ownerName = currentUserEmail ? currentUserEmail.split('@')[0] : "مستخدم";
+
+            if(!roomName) {
+                alert("الرجاء كتابة اسم الغرفة.");
                 return;
             }
-            userJewels += 30;
-            hasClaimedDaily = true;
-            updateJewelsUI();
-            alert("تم إضافة 30 جوهرة مجانية إلى رصيدك بنجاح!");
-        }
-
-        function updateJewelsUI() {
-            document.getElementById('userJewels').innerText = userJewels;
-            document.getElementById('headerJewels').innerText = userJewels;
-        }
-
-        function requestWithdraw() {
-            if(userJewels < 5000) {
-                alert(`رصيدك الحالي (${userJewels}) غير كافٍ. الحد الأدنى للسحب هو 5000 جوهرة مقابل 10 دولار.`);
-                return;
-            }
-            alert(`تم تسجيل طلب سحب الأرباح بنجاح! سيتم إرسال المستحقات عبر فودافون كاش على الرقم الأساسي (01213783090).`);
-            userJewels -= 5000;
-            updateJewelsUI();
-        }
-
-        function createRoom() {
-            const input = document.getElementById('roomNameInput');
-            const roomName = input.value.trim();
-            if(!roomName) return;
 
             for(let word of bannedWords) {
                 if(roomName.includes(word)) {
-                    alert("⚠️ تحذير صارم من السيستم: اسم الغرفة يحتوي على كلمات مخالفة لقواعد المنصة وتم حظر الحساب!");
-                    document.body.innerHTML = '<div class="h-screen flex items-center justify-center text-center p-6 text-red-500 font-bold text-lg">تم حظر حسابك نهائياً لمخالفة قواعد وأمان سهرة لايف.</div>';
+                    alert("⚠️ تحذير: اسم الغرفة مخالف لقواعد المنصة وتم حظر الحساب!");
+                    document.body.innerHTML = '<div class="h-screen flex items-center justify-center text-center p-6 text-red-500 font-bold text-lg">تم حظر حسابك نهائياً لمخالفة سياسة المنصة.</div>';
                     return;
                 }
             }
 
             const container = document.getElementById('roomsListContainer');
             const newDiv = document.createElement('div');
-            newDiv.className = "bg-slate-900 border border-slate-800 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold shrink-0 cursor-pointer";
-            newDiv.innerText = roomName;
+            newDiv.className = "room-tab bg-slate-900 border border-slate-800 text-slate-300 px-4 py-2.5 rounded-xl text-xs font-bold shrink-0 cursor-pointer shadow-md transition";
+            newDiv.innerText = `${roomName} (${maxSeats} مقعد)`;
+            newDiv.onclick = function() { switchRoom(roomName, maxSeats, ownerName); };
             container.appendChild(newDiv);
-            input.value = "";
+
+            nameInput.value = "";
             toggleRoomModal();
-            alert(`تم إنشاء الغرفة (${roomName}) بنجاح وأصبحت متاحة للجميع أونلاين!`);
+            switchRoom(roomName, maxSeats, ownerName);
+            alert(`تم إنشاء غرفة (${roomName}) وأنت الآن مالك الغرفة!`);
+        }
+
+        function switchRoom(roomName, maxSeats, ownerName) {
+            currentRoomName = roomName;
+            currentMaxSeats = maxSeats;
+            currentRoomOwner = ownerName;
+            
+            document.getElementById('activeRoomTitle').innerText = `أنت الآن في: ${roomName} (المالك: ${ownerName})`;
+            document.getElementById('activeRoomSeatsInfo').innerText = `المقاعد: 1 / ${maxSeats}`;
+            
+            const chatBox = document.getElementById('chatBox');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = "bg-slate-900 border border-slate-800 p-3 rounded-xl text-xs space-y-1 fade-in";
+            msgDiv.innerHTML = `<span class="font-bold text-purple-400">النظام 🤖</span><p class="text-slate-300">انتقلت إلى غرفة (${roomName}). مالك الغرفة هو (${ownerName}).</p>`;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
         function sendMessage() {
@@ -182,19 +193,40 @@
 
             for(let word of bannedWords) {
                 if(text.includes(word)) {
-                    alert("🚨 تحذير أمني من السيستم: تم رصد محتوى مخالف أو ألفاظ خارجة. تم حظر حسابك فوراً!");
-                    document.body.innerHTML = '<div class="h-screen flex items-center justify-center text-center p-6 text-red-500 font-bold text-lg">تم حظر حسابك نهائياً لمخالفة معايير الأمان والدردشة.</div>';
+                    alert("🚨 تحذير أمني: تم رصد ألفاظ مخالفة وتم حظر الحساب فوراً!");
+                    document.body.innerHTML = '<div class="h-screen flex items-center justify-center text-center p-6 text-red-500 font-bold text-lg">تم حظر حسابك نهائياً لمخالفة معايير الأمان.</div>';
                     return;
                 }
             }
 
             const chatBox = document.getElementById('chatBox');
             const msgDiv = document.createElement('div');
-            msgDiv.className = "bg-slate-900 border border-slate-800 p-3 rounded-xl text-xs space-y-1 fade-in";
-            msgDiv.innerHTML = `<span class="font-bold text-purple-400">${userName}</span><p class="text-slate-200">${text}</p>`;
+            msgDiv.className = "bg-slate-900 border border-slate-800 p-3 rounded-xl text-xs space-y-2 fade-in";
+            
+            const myName = currentUserEmail ? currentUserEmail.split('@')[0] : "زوار";
+            
+            let htmlContent = `<div class="flex justify-between items-center"><span class="font-bold text-purple-400">${myName}</span>`;
+            
+            // إذا كان المستخدم الحالي هو "مالك الغرفة"، يظهر له زر "حظر" بجانب أي رسالة في غرفته!
+            if (myName === currentRoomOwner && currentRoomOwner !== "النظام") {
+                htmlContent += `<button onclick="kickUser('${myName}')" class="bg-red-600/20 border border-red-500/30 text-red-400 px-2 py-0.5 rounded text-[10px] font-bold hover:bg-red-600 hover:text-white transition">حظر من الغرفة 🚫</button>`;
+            }
+            htmlContent += `</div><p class="text-slate-200">${text}</p>`;
+
+            msgDiv.innerHTML = htmlContent;
             chatBox.appendChild(msgDiv);
             chatBox.scrollTop = chatBox.scrollHeight;
             input.value = "";
+        }
+
+        function kickUser(userName) {
+            alert(`⚠️ تم حظر المستخدم بنجاح من قِبل مالك الغرفة (${currentRoomOwner})!`);
+            const chatBox = document.getElementById('chatBox');
+            const kickDiv = document.createElement('div');
+            kickDiv.className = "bg-red-950/40 border border-red-900/50 p-2 rounded-xl text-[11px] text-red-400 text-center font-bold fade-in";
+            kickDiv.innerText = `تم طرد وحظر أحد المستخدمين من قِبل مالك الغرفة.`;
+            chatBox.appendChild(kickDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
     </script>
 </body>
