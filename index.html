@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تحديات الليل والكؤوس 🏆</title>
+    <title>سهرة لايف 🌟</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { user-select: none; -webkit-tap-highlight-color: transparent; }
@@ -15,207 +15,186 @@
         .fade-in { animation: fadeIn 0.25s ease-out forwards; }
     </style>
 </head>
-<body class="bg-slate-950 text-white h-screen flex flex-col justify-between max-w-md mx-auto border-x border-slate-800 shadow-2xl relative">
+<body class="bg-slate-950 text-white h-screen flex flex-col justify-between max-w-md mx-auto border-x border-slate-800 shadow-2xl relative overflow-hidden">
 
-    <!-- شاشة علامة السهرة الترحيبية (تظهر أول ما تدخل وتدخلك تلقائياً) -->
-    <div id="introScreen" class="fixed inset-0 bg-slate-950 z-50 flex flex-col items-center justify-center p-6 text-center space-y-6">
-        <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl w-full shadow-2xl space-y-4">
-            <div class="text-4xl mb-2">🎭✨</div>
-            <h1 class="text-2xl font-black text-purple-400">سهرة الليل وتحديات الأصحاب</h1>
-            <p class="text-xs text-slate-400 leading-relaxed">أفضل تطبيق سهرة وجمع نقاط لكسب الهدايا الحقيقية، جاهز للسهرة؟</p>
-            
-            <div class="space-y-3 pt-2">
-                <input type="text" id="userName" placeholder="اكتب اسمك الثلاثي..." class="w-full bg-slate-950 border border-slate-800 p-3.5 rounded-xl text-sm text-white focus:outline-none focus:border-purple-500 text-center">
-                <input type="tel" id="userPhone" placeholder="رقم الهاتف للتواصل لو فزت..." class="w-full bg-slate-950 border border-slate-800 p-3.5 rounded-xl text-sm text-white focus:outline-none focus:border-purple-500 text-center">
-                <button onclick="startApp()" class="w-full bg-purple-600 hover:bg-purple-700 py-3.5 rounded-xl font-bold text-sm transition shadow-lg active:scale-95">دخول السهرة فوراً 🚀</button>
-            </div>
+    <!-- شاشة تسجيل الدخول مع رسالة الترحيب المطلوبة -->
+    <div id="loginScreen" class="fixed inset-0 bg-slate-950 z-50 flex flex-col items-center justify-center p-6 text-center">
+        <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl w-full shadow-2xl space-y-5">
+            <div class="text-4xl">💎🎙️</div>
+            <h1 class="text-2xl font-black text-purple-400">مرحباً بك في سهرة لايف</h1>
+            <p class="text-xs text-slate-400 leading-relaxed">منصة الدردشة، الغرف الحية، والوكالات. سجل دخولك الآن بحساب جوجل للبدء!</p>
+            <button onclick="loginWithGoogle()" class="w-full bg-white hover:bg-slate-100 text-slate-950 py-3.5 rounded-xl font-bold text-sm transition shadow-lg flex items-center justify-center space-x-2 space-x-reverse active:scale-95">
+                <span>🌐</span>
+                <span>تسجيل الدخول بحساب جوجل</span>
+            </button>
         </div>
     </div>
 
-    <!-- نافذة متجر الهدايا (تفتح عند الضغط على زر الكأس في الشمال) -->
-    <div id="prizesModal" class="fixed inset-0 bg-slate-950/95 z-40 hidden flex flex-col p-4 overflow-y-auto">
+    <!-- نافذة الجواهر والمتجر (الشمال) -->
+    <div id="jewelsModal" class="fixed inset-0 bg-slate-950/95 z-40 hidden flex flex-col p-4 overflow-y-auto">
         <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
-            <h2 class="font-bold text-lg text-yellow-400">🏆 متجر الهدايا والنقاط</h2>
-            <button onclick="togglePrizesModal()" class="bg-slate-800 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300">إغلاق ✕</button>
+            <h2 class="font-bold text-lg text-cyan-400">💎 رصيد الجواهر والأرباح</h2>
+            <button onclick="toggleJewelsModal()" class="bg-slate-800 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300">إغلاق ✕</button>
         </div>
         
-        <!-- ملخص نقاط المستخدم الحالي -->
-        <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl mb-4 text-center shadow-inner">
+        <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl mb-4 text-center shadow-inner space-y-2">
             <p class="text-xs text-slate-400">رصيدك الحالي:</p>
-            <p class="text-2xl font-black text-yellow-400 mt-1"><span id="modalScore">0</span> نقطة ⭐</p>
+            <p class="text-3xl font-black text-cyan-400"><span id="userJewels">30</span> جوهرة 💎</p>
+            <button onclick="claimDailyBonus()" id="dailyBtn" class="bg-cyan-600 hover:bg-cyan-700 w-full py-2 rounded-xl text-xs font-bold transition">استلم 30 جوهرة اليومية المجانية 🎁</button>
         </div>
 
-        <!-- قائمة الهدايا -->
         <div class="space-y-3 pb-6">
-            <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl flex justify-between items-center">
-                <div>
-                    <h3 class="font-bold text-sm text-slate-200">🎁 كارت شحن (50 جنيه)</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">مطلوب: 5,000 نقطة</p>
-                </div>
-                <button onclick="claimPrize(5000, 'كارت شحن 50 جنيه')" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 rounded-lg text-xs font-bold transition">استبدال</button>
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2">
+                <h3 class="font-bold text-sm text-yellow-400">💸 سحب الأرباح (كل 5000 جوهرة = 10 دولار)</h3>
+                <p class="text-xs text-slate-400">يتم التحويل عبر فودافون كاش على الرقم الأساسي: <span class="text-white font-bold">01213783090</span></p>
+                <button onclick="requestWithdraw()" class="w-full bg-yellow-600 hover:bg-yellow-700 py-2 rounded-xl text-xs font-bold transition">طلب سحب الأرباح 💵</button>
             </div>
-
-            <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl flex justify-between items-center">
-                <div>
-                    <h3 class="font-bold text-sm text-slate-200">🎧 سماعة أذن سلكية هاندفري</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">مطلوب: 15,000 نقطة</p>
-                </div>
-                <button onclick="claimPrize(15000, 'سماعة أذن سلكية')" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 rounded-lg text-xs font-bold transition">استبدال</button>
-            </div>
-
-            <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl flex justify-between items-center">
-                <div>
-                    <h3 class="font-bold text-sm text-slate-200">🔋 باور بانك خفيف (10,000 أمبير)</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">مطلوب: 25,000 نقطة</p>
-                </div>
-                <button onclick="claimPrize(25000, 'باور بانك خفيف')" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 rounded-lg text-xs font-bold transition">استبدال</button>
-            </div>
-
-            <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl flex justify-between items-center">
-                <div>
-                    <h3 class="font-bold text-sm text-slate-200">🎮 جهاز PlayStation 5 الكبرى</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">مطلوب: 50,000 نقطة</p>
-                </div>
-                <button onclick="claimPrize(50000, 'PlayStation 5')" class="bg-yellow-600 hover:bg-yellow-700 px-3 py-1.5 rounded-lg text-xs font-bold transition">استبدال</button>
+            
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2">
+                <h3 class="font-bold text-sm text-purple-400">⚡ شحن الجواهر</h3>
+                <p class="text-xs text-slate-400">لشحن رصيدك واستخدامه في الغرف والوكالات تواصل مع الدعم الفني أو حول على الرقم المعتمد.</p>
             </div>
         </div>
     </div>
 
-    <!-- رأس التطبيق (علامة الكأس على الشمال والعداد) -->
-    <header class="bg-slate-900 border-b border-slate-800 p-4 flex justify-between items-center">
-        <button onclick="togglePrizesModal()" class="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-xl text-xs font-bold text-yellow-400 flex items-center space-x-1.5 space-x-reverse hover:bg-slate-800 transition active:scale-95">
-            <span>🏆</span>
-            <span>الهدايا</span>
-        </button>
-
-        <div class="bg-slate-950 border border-slate-800 px-3 py-1 rounded-full text-xs font-bold text-yellow-400">
-            ⭐ <span id="scoreDisplay">0</span> نقطة
+    <!-- نافذة إنشاء غرفة جديدة أو وكالة مع فلترة المحتوى السيئ -->
+    <div id="roomModal" class="fixed inset-0 bg-slate-950/95 z-40 hidden flex flex-col p-4 justify-center items-center">
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl w-full max-w-sm space-y-4 shadow-2xl">
+            <h2 class="font-bold text-lg text-purple-400 text-center">إنشاء غرفة / وكالة جديدة 🎙️</h2>
+            <input type="text" id="roomNameInput" placeholder="اكتب اسم الغرفة أو الوكالة..." class="w-full bg-slate-950 border border-slate-800 p-3 rounded-xl text-sm text-white focus:outline-none focus:border-purple-500">
+            <div class="flex space-x-2 space-x-reverse">
+                <button onclick="createRoom()" class="flex-1 bg-purple-600 hover:bg-purple-700 py-2.5 rounded-xl text-xs font-bold transition">إنشاء</button>
+                <button onclick="toggleRoomModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 py-2.5 rounded-xl text-xs font-bold transition">إلغاء</button>
+            </div>
         </div>
+    </div>
+
+    <!-- رأس التطبيق -->
+    <header class="bg-slate-900 border-b border-slate-800 p-4 flex justify-between items-center z-10">
+        <button onclick="toggleJewelsModal()" class="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-xl text-xs font-bold text-cyan-400 flex items-center space-x-1 space-x-reverse hover:bg-slate-800 transition">
+            <span>💎</span>
+            <span><span id="headerJewels">30</span> جوهرة</span>
+        </button>
+        <div class="text-sm font-black text-purple-400">سهرة لايف 🌟</div>
+        <button onclick="toggleRoomModal()" class="bg-purple-600/20 border border-purple-500/30 px-3 py-1.5 rounded-xl text-xs font-bold text-purple-300 hover:bg-purple-600/30 transition">
+            + غرفة
+        </button>
     </header>
 
-    <!-- محتوى التطبيق الأساسي -->
-    <main id="appContent" class="flex-1 p-6 flex flex-col items-center justify-center space-y-6 text-center">
-        <div id="cardBox" class="bg-slate-900 border border-slate-800 p-6 rounded-2xl w-full shadow-lg space-y-4 fade-in">
-            <span id="categoryBadge" class="text-xs bg-purple-500/10 text-purple-400 px-3 py-1 rounded-full border border-purple-500/20">جاهز للتحدي</span>
-            <h2 id="questionBox" class="text-base font-bold text-slate-100 leading-relaxed min-h-[80px] flex items-center justify-center">
-                اختر قسماً من الأسفل وابدأ جمع النقاط الآن! 🎯
-            </h2>
+    <!-- محتوى الشات العام والغرف -->
+    <main class="flex-1 p-4 flex flex-col space-y-4 overflow-hidden">
+        <div class="flex space-x-2 space-x-reverse overflow-x-auto pb-1" id="roomsListContainer">
+            <div class="bg-purple-600 text-white px-4 py-2 rounded-xl text-xs font-bold shrink-0 cursor-pointer">الدردشة العامة 🌐</div>
+            <div class="bg-slate-900 border border-slate-800 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold shrink-0 cursor-pointer">وكالة السهرة 👑</div>
         </div>
 
-        <button onclick="completeChallenge()" id="nextBtn" class="hidden w-full bg-green-600 hover:bg-green-700 py-3 rounded-xl font-bold text-sm transition shadow-lg active:scale-95">
-            أتممت التحدي (خذ +1000 نقطة) ✅
-        </button>
+        <!-- صندوق الرسائل -->
+        <div id="chatBox" class="flex-1 bg-slate-900/50 border border-slate-800/80 rounded-2xl p-4 overflow-y-auto space-y-3">
+            <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-xs space-y-1">
+                <span class="font-bold text-purple-400">نظام السيستم الآلي 🤖</span>
+                <p class="text-slate-300">أهلاً بك في سهرة لايف! النظام يراقب المحتوى تلقائياً؛ أي كلمة خارجة أو مخالفة تعرض حسابك للحظر الفوري.</p>
+            </div>
+        </div>
+
+        <!-- صندوق الكتابة والرقابة -->
+        <div class="flex space-x-2 space-x-reverse">
+            <input type="text" id="messageInput" placeholder="اكتب رسالتك أو تفاعل في الغرفة..." class="flex-1 bg-slate-900 border border-slate-800 p-3 rounded-xl text-xs text-white focus:outline-none focus:border-purple-500">
+            <button onclick="sendMessage()" class="bg-purple-600 hover:bg-purple-700 px-5 rounded-xl text-xs font-bold transition active:scale-95">إرسال 🚀</button>
+        </div>
     </main>
 
-    <!-- أزرار الأقسام بالأسفل -->
-    <nav class="bg-slate-900 border-t border-slate-800 p-3 grid grid-cols-3 gap-2">
-        <button onclick="selectCategory('truth')" class="bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-xs font-semibold text-blue-400 hover:bg-slate-800 transition active:scale-95">
-            🤫 صراحة جريئة
-        </button>
-        <button onclick="selectCategory('dare')" class="bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-xs font-semibold text-red-400 hover:bg-slate-800 transition active:scale-95">
-            🔥 تحديات قوية
-        </button>
-        <button onclick="selectCategory('trivia')" class="bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-xs font-semibold text-yellow-400 hover:bg-slate-800 transition active:scale-95">
-            🧠 ذكاء وتخمين
-        </button>
-    </nav>
-
     <script>
-        let score = 0;
-        let playerName = "";
-        let playerPhone = "";
+        let userJewels = 30;
+        let userName = "";
+        let hasClaimedDaily = false;
 
-        function startApp() {
-            const name = document.getElementById('userName').value.trim();
-            const phone = document.getElementById('userPhone').value.trim();
-            if(!name || !phone) {
-                alert("من فضلك اكتب اسمك ورقم هاتفك لنبدأ السهرة!");
+        const bannedWords = ["شتم", "قذارة", "نصب", "عنف", "حرب", "سفالة", "وسخ"];
+
+        function loginWithGoogle() {
+            userName = prompt("أدخل اسم المستخدم الخاص بك لتأكيد ربط حساب جوجل:") || "مستخدم جديد";
+            if(userName.trim() === "") userName = "مستخدم جديد";
+            document.getElementById('loginScreen').style.display = 'none';
+        }
+
+        function toggleJewelsModal() {
+            const modal = document.getElementById('jewelsModal');
+            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function toggleRoomModal() {
+            const modal = document.getElementById('roomModal');
+            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function claimDailyBonus() {
+            if(hasClaimedDaily) {
+                alert("لقد استلمت هدية الـ 30 جوهرة اليومية بالفعل، انتظر للغد!");
                 return;
             }
-            playerName = name;
-            playerPhone = phone;
-            // الانتقال الفوري وبدون أي تحميل
-            document.getElementById('introScreen').style.display = 'none';
+            userJewels += 30;
+            hasClaimedDaily = true;
+            updateJewelsUI();
+            alert("تم إضافة 30 جوهرة مجانية إلى رصيدك بنجاح!");
         }
 
-        function togglePrizesModal() {
-            const modal = document.getElementById('prizesModal');
-            document.getElementById('modalScore').innerText = score;
-            if(modal.style.display === 'flex') {
-                modal.style.display = 'none';
-            } else {
-                modal.style.display = 'flex';
+        function updateJewelsUI() {
+            document.getElementById('userJewels').innerText = userJewels;
+            document.getElementById('headerJewels').innerText = userJewels;
+        }
+
+        function requestWithdraw() {
+            if(userJewels < 5000) {
+                alert(`رصيدك الحالي (${userJewels}) غير كافٍ. الحد الأدنى للسحب هو 5000 جوهرة مقابل 10 دولار.`);
+                return;
             }
+            alert(`تم تسجيل طلب سحب الأرباح بنجاح! سيتم إرسال المستحقات عبر فودافون كاش على الرقم الأساسي (01213783090).`);
+            userJewels -= 5000;
+            updateJewelsUI();
         }
 
-        function claimPrize(requiredPoints, prizeName) {
-            if(score >= requiredPoints) {
-                alert(`مبروك يا ${playerName}! استبدلت نقاطك بـ (${prizeName}). تم تسجيل طلبك برقم هاتفك وسيتم التواصل معك قريباً.`);
-                score -= requiredPoints;
-                document.getElementById('scoreDisplay').innerText = score;
-                document.getElementById('modalScore').innerText = score;
-                togglePrizesModal();
-            } else {
-                alert(`عذراً يا ${playerName}، نقاطك الحالية (${score}) غير كافية. تحتاج إلى ${requiredPoints - score} نقطة إضافية.`);
+        function createRoom() {
+            const input = document.getElementById('roomNameInput');
+            const roomName = input.value.trim();
+            if(!roomName) return;
+
+            for(let word of bannedWords) {
+                if(roomName.includes(word)) {
+                    alert("⚠️ تحذير صارم من السيستم: اسم الغرفة يحتوي على كلمات مخالفة لقواعد المنصة وتم حظر الحساب!");
+                    document.body.innerHTML = '<div class="h-screen flex items-center justify-center text-center p-6 text-red-500 font-bold text-lg">تم حظر حسابك نهائياً لمخالفة قواعد وأمان سهرة لايف.</div>';
+                    return;
+                }
             }
+
+            const container = document.getElementById('roomsListContainer');
+            const newDiv = document.createElement('div');
+            newDiv.className = "bg-slate-900 border border-slate-800 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold shrink-0 cursor-pointer";
+            newDiv.innerText = roomName;
+            container.appendChild(newDiv);
+            input.value = "";
+            toggleRoomModal();
+            alert(`تم إنشاء الغرفة (${roomName}) بنجاح وأصبحت متاحة للجميع أونلاين!`);
         }
 
-        const data = {
-            truth: [
-                "اكتر موقف حسيت فيه بكسفة شديدة قدام الناس كان إيه؟",
-                "لو معاك مليون جنيه دلوقتي، أول حاجة هتعملها إيه؟",
-                "إيه أكتر صفة بتكرهها في الشخص اللي قاعد قدامك؟",
-                "مين أكتر شخص بتثق فيه في حياتك لدرجة العمى؟",
-                "لو رجع بيك الزمن لورا، هتغير إيه في قرار خدته؟"
-            ],
-            dare: [
-                "اتصل على شخص مش مكلمه من زمان وقله 'وحشتني' واقفل فوراً!",
-                "قلد صوت قطة أو كلب لمدة دقيقة كاملة قدام الكل.",
-                "اعمل نفسك مذيع أخبار واقرأ نشرة أخبار عن أصحابك بصوت كوميدي.",
-                "ابعت آخر صورة عندك في الاستوديو لأول شخص في الواتساب.",
-                "امشي في الغرفة بطريقة عارضة أزياء مجنونة لمدة 30 ثانية."
-            ],
-            trivia: [
-                "ما هو الحيوان الذي ينام وعيناه مفتوحتان؟ (السمكة)",
-                "كم عدد عظام جسم الإنسان البالغ؟ (206 عظمة)",
-                "ما هي عاصمة أستراليا وليست سيدني؟ (كانبرا)",
-                "ما هو الشيء الذي كلما أخذت منه كبر؟ (الحفرة)",
-                "أسرع حيوان بري في العالم هو؟ (الفهد)"
-            ]
-        };
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            if(!text) return;
 
-        let currentCategory = '';
+            for(let word of bannedWords) {
+                if(text.includes(word)) {
+                    alert("🚨 تحذير أمني من السيستم: تم رصد محتوى مخالف أو ألفاظ خارجة. تم حظر حسابك فوراً!");
+                    document.body.innerHTML = '<div class="h-screen flex items-center justify-center text-center p-6 text-red-500 font-bold text-lg">تم حظر حسابك نهائياً لمخالفة معايير الأمان والدردشة.</div>';
+                    return;
+                }
+            }
 
-        function selectCategory(category) {
-            currentCategory = category;
-            document.getElementById('nextBtn').classList.remove('hidden');
-            
-            let name = "";
-            if(category === 'truth') name = "قسم الصراحة الجريئة 🤫";
-            if(category === 'dare') name = "قسم التحديات القوية 🔥";
-            if(category === 'trivia') name = "قسم الذكاء والتخمين 🧠";
-            
-            document.getElementById('categoryBadge').innerText = name;
-            loadNewQuestion();
-        }
-
-        function loadNewQuestion() {
-            if (!currentCategory) return;
-            const list = data[currentCategory];
-            const randomIndex = Math.floor(Math.random() * list.length);
-            
-            const box = document.getElementById('cardBox');
-            box.classList.remove('fade-in');
-            void box.offsetWidth; 
-            box.classList.add('fade-in');
-
-            document.getElementById('questionBox').innerText = list[randomIndex];
-        }
-
-        function completeChallenge() {
-            score += 1000;
-            document.getElementById('scoreDisplay').innerText = score;
-            loadNewQuestion();
+            const chatBox = document.getElementById('chatBox');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = "bg-slate-900 border border-slate-800 p-3 rounded-xl text-xs space-y-1 fade-in";
+            msgDiv.innerHTML = `<span class="font-bold text-purple-400">${userName}</span><p class="text-slate-200">${text}</p>`;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            input.value = "";
         }
     </script>
 </body>
