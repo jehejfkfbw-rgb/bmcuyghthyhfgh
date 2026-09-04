@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحديات الليل والكؤوس 🏆</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { user-select: none; -webkit-tap-highlight-color: transparent; }
+        ::-webkit-scrollbar { display: none; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.25s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-slate-950 text-white h-screen flex flex-col justify-between max-w-md mx-auto border-x border-slate-800 shadow-2xl relative">
+
+    <!-- شاشة علامة السهرة الترحيبية (تظهر أول ما تدخل وتدخلك تلقائياً) -->
+    <div id="introScreen" class="fixed inset-0 bg-slate-950 z-50 flex flex-col items-center justify-center p-6 text-center space-y-6">
+        <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl w-full shadow-2xl space-y-4">
+            <div class="text-4xl mb-2">🎭✨</div>
+            <h1 class="text-2xl font-black text-purple-400">سهرة الليل وتحديات الأصحاب</h1>
+            <p class="text-xs text-slate-400 leading-relaxed">أفضل تطبيق سهرة وجمع نقاط لكسب الهدايا الحقيقية، جاهز للسهرة؟</p>
+            
+            <div class="space-y-3 pt-2">
+                <input type="text" id="userName" placeholder="اكتب اسمك الثلاثي..." class="w-full bg-slate-950 border border-slate-800 p-3.5 rounded-xl text-sm text-white focus:outline-none focus:border-purple-500 text-center">
+                <input type="tel" id="userPhone" placeholder="رقم الهاتف للتواصل لو فزت..." class="w-full bg-slate-950 border border-slate-800 p-3.5 rounded-xl text-sm text-white focus:outline-none focus:border-purple-500 text-center">
+                <button onclick="startApp()" class="w-full bg-purple-600 hover:bg-purple-700 py-3.5 rounded-xl font-bold text-sm transition shadow-lg active:scale-95">دخول السهرة فوراً 🚀</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة متجر الهدايا (تفتح عند الضغط على زر الكأس في الشمال) -->
+    <div id="prizesModal" class="fixed inset-0 bg-slate-950/95 z-40 hidden flex flex-col p-4 overflow-y-auto">
+        <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
+            <h2 class="font-bold text-lg text-yellow-400">🏆 متجر الهدايا والنقاط</h2>
+            <button onclick="togglePrizesModal()" class="bg-slate-800 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-300">إغلاق ✕</button>
+        </div>
+        
+        <!-- ملخص نقاط المستخدم الحالي -->
+        <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl mb-4 text-center shadow-inner">
+            <p class="text-xs text-slate-400">رصيدك الحالي:</p>
+            <p class="text-2xl font-black text-yellow-400 mt-1"><span id="modalScore">0</span> نقطة ⭐</p>
+        </div>
+
+        <!-- قائمة الهدايا -->
+        <div class="space-y-3 pb-6">
+            <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl flex justify-between items-center">
+                <div>
+                    <h3 class="font-bold text-sm text-slate-200">🎁 كارت شحن (50 جنيه)</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">مطلوب: 5,000 نقطة</p>
+                </div>
+                <button onclick="claimPrize(5000, 'كارت شحن 50 جنيه')" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 rounded-lg text-xs font-bold transition">استبدال</button>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl flex justify-between items-center">
+                <div>
+                    <h3 class="font-bold text-sm text-slate-200">🎧 سماعة أذن سلكية هاندفري</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">مطلوب: 15,000 نقطة</p>
+                </div>
+                <button onclick="claimPrize(15000, 'سماعة أذن سلكية')" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 rounded-lg text-xs font-bold transition">استبدال</button>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl flex justify-between items-center">
+                <div>
+                    <h3 class="font-bold text-sm text-slate-200">🔋 باور بانك خفيف (10,000 أمبير)</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">مطلوب: 25,000 نقطة</p>
+                </div>
+                <button onclick="claimPrize(25000, 'باور بانك خفيف')" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 rounded-lg text-xs font-bold transition">استبدال</button>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl flex justify-between items-center">
+                <div>
+                    <h3 class="font-bold text-sm text-slate-200">🎮 جهاز PlayStation 5 الكبرى</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">مطلوب: 50,000 نقطة</p>
+                </div>
+                <button onclick="claimPrize(50000, 'PlayStation 5')" class="bg-yellow-600 hover:bg-yellow-700 px-3 py-1.5 rounded-lg text-xs font-bold transition">استبدال</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- رأس التطبيق (علامة الكأس على الشمال والعداد) -->
+    <header class="bg-slate-900 border-b border-slate-800 p-4 flex justify-between items-center">
+        <button onclick="togglePrizesModal()" class="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-xl text-xs font-bold text-yellow-400 flex items-center space-x-1.5 space-x-reverse hover:bg-slate-800 transition active:scale-95">
+            <span>🏆</span>
+            <span>الهدايا</span>
+        </button>
+
+        <div class="bg-slate-950 border border-slate-800 px-3 py-1 rounded-full text-xs font-bold text-yellow-400">
+            ⭐ <span id="scoreDisplay">0</span> نقطة
+        </div>
+    </header>
+
+    <!-- محتوى التطبيق الأساسي -->
+    <main id="appContent" class="flex-1 p-6 flex flex-col items-center justify-center space-y-6 text-center">
+        <div id="cardBox" class="bg-slate-900 border border-slate-800 p-6 rounded-2xl w-full shadow-lg space-y-4 fade-in">
+            <span id="categoryBadge" class="text-xs bg-purple-500/10 text-purple-400 px-3 py-1 rounded-full border border-purple-500/20">جاهز للتحدي</span>
+            <h2 id="questionBox" class="text-base font-bold text-slate-100 leading-relaxed min-h-[80px] flex items-center justify-center">
+                اختر قسماً من الأسفل وابدأ جمع النقاط الآن! 🎯
+            </h2>
+        </div>
+
+        <button onclick="completeChallenge()" id="nextBtn" class="hidden w-full bg-green-600 hover:bg-green-700 py-3 rounded-xl font-bold text-sm transition shadow-lg active:scale-95">
+            أتممت التحدي (خذ +1000 نقطة) ✅
+        </button>
+    </main>
+
+    <!-- أزرار الأقسام بالأسفل -->
+    <nav class="bg-slate-900 border-t border-slate-800 p-3 grid grid-cols-3 gap-2">
+        <button onclick="selectCategory('truth')" class="bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-xs font-semibold text-blue-400 hover:bg-slate-800 transition active:scale-95">
+            🤫 صراحة جريئة
+        </button>
+        <button onclick="selectCategory('dare')" class="bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-xs font-semibold text-red-400 hover:bg-slate-800 transition active:scale-95">
+            🔥 تحديات قوية
+        </button>
+        <button onclick="selectCategory('trivia')" class="bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-xs font-semibold text-yellow-400 hover:bg-slate-800 transition active:scale-95">
+            🧠 ذكاء وتخمين
+        </button>
+    </nav>
+
+    <script>
+        let score = 0;
+        let playerName = "";
+        let playerPhone = "";
+
+        function startApp() {
+            const name = document.getElementById('userName').value.trim();
+            const phone = document.getElementById('userPhone').value.trim();
+            if(!name || !phone) {
+                alert("من فضلك اكتب اسمك ورقم هاتفك لنبدأ السهرة!");
+                return;
+            }
+            playerName = name;
+            playerPhone = phone;
+            // الانتقال الفوري وبدون أي تحميل
+            document.getElementById('introScreen').style.display = 'none';
+        }
+
+        function togglePrizesModal() {
+            const modal = document.getElementById('prizesModal');
+            document.getElementById('modalScore').innerText = score;
+            if(modal.style.display === 'flex') {
+                modal.style.display = 'none';
+            } else {
+                modal.style.display = 'flex';
+            }
+        }
+
+        function claimPrize(requiredPoints, prizeName) {
+            if(score >= requiredPoints) {
+                alert(`مبروك يا ${playerName}! استبدلت نقاطك بـ (${prizeName}). تم تسجيل طلبك برقم هاتفك وسيتم التواصل معك قريباً.`);
+                score -= requiredPoints;
+                document.getElementById('scoreDisplay').innerText = score;
+                document.getElementById('modalScore').innerText = score;
+                togglePrizesModal();
+            } else {
+                alert(`عذراً يا ${playerName}، نقاطك الحالية (${score}) غير كافية. تحتاج إلى ${requiredPoints - score} نقطة إضافية.`);
+            }
+        }
+
+        const data = {
+            truth: [
+                "اكتر موقف حسيت فيه بكسفة شديدة قدام الناس كان إيه؟",
+                "لو معاك مليون جنيه دلوقتي، أول حاجة هتعملها إيه؟",
+                "إيه أكتر صفة بتكرهها في الشخص اللي قاعد قدامك؟",
+                "مين أكتر شخص بتثق فيه في حياتك لدرجة العمى؟",
+                "لو رجع بيك الزمن لورا، هتغير إيه في قرار خدته؟"
+            ],
+            dare: [
+                "اتصل على شخص مش مكلمه من زمان وقله 'وحشتني' واقفل فوراً!",
+                "قلد صوت قطة أو كلب لمدة دقيقة كاملة قدام الكل.",
+                "اعمل نفسك مذيع أخبار واقرأ نشرة أخبار عن أصحابك بصوت كوميدي.",
+                "ابعت آخر صورة عندك في الاستوديو لأول شخص في الواتساب.",
+                "امشي في الغرفة بطريقة عارضة أزياء مجنونة لمدة 30 ثانية."
+            ],
+            trivia: [
+                "ما هو الحيوان الذي ينام وعيناه مفتوحتان؟ (السمكة)",
+                "كم عدد عظام جسم الإنسان البالغ؟ (206 عظمة)",
+                "ما هي عاصمة أستراليا وليست سيدني؟ (كانبرا)",
+                "ما هو الشيء الذي كلما أخذت منه كبر؟ (الحفرة)",
+                "أسرع حيوان بري في العالم هو؟ (الفهد)"
+            ]
+        };
+
+        let currentCategory = '';
+
+        function selectCategory(category) {
+            currentCategory = category;
+            document.getElementById('nextBtn').classList.remove('hidden');
+            
+            let name = "";
+            if(category === 'truth') name = "قسم الصراحة الجريئة 🤫";
+            if(category === 'dare') name = "قسم التحديات القوية 🔥";
+            if(category === 'trivia') name = "قسم الذكاء والتخمين 🧠";
+            
+            document.getElementById('categoryBadge').innerText = name;
+            loadNewQuestion();
+        }
+
+        function loadNewQuestion() {
+            if (!currentCategory) return;
+            const list = data[currentCategory];
+            const randomIndex = Math.floor(Math.random() * list.length);
+            
+            const box = document.getElementById('cardBox');
+            box.classList.remove('fade-in');
+            void box.offsetWidth; 
+            box.classList.add('fade-in');
+
+            document.getElementById('questionBox').innerText = list[randomIndex];
+        }
+
+        function completeChallenge() {
+            score += 1000;
+            document.getElementById('scoreDisplay').innerText = score;
+            loadNewQuestion();
+        }
+    </script>
+</body>
+</html>
