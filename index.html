@@ -47,6 +47,25 @@
             color: var(--accent-color);
         }
 
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-links button {
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .nav-links button:hover {
+            color: var(--accent-color);
+        }
+
         main {
             flex: 1;
             max-width: 1200px;
@@ -68,8 +87,8 @@
             padding: 2rem;
             border-radius: 12px;
             border: 1px solid var(--border-color);
-            max-width: 400px;
-            margin: 4rem auto;
+            max-width: 500px;
+            margin: 2rem auto;
             box-shadow: 0 10px 25px rgba(0,0,0,0.3);
         }
 
@@ -135,6 +154,8 @@
             overflow: hidden;
             cursor: pointer;
             transition: transform 0.2s, border-color 0.2s;
+            display: flex;
+            flex-direction: column;
         }
 
         .room-card:hover {
@@ -142,8 +163,19 @@
             border-color: var(--accent-color);
         }
 
+        .room-poster {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background-color: #0f172a;
+        }
+
         .room-header {
-            padding: 1.5rem;
+            padding: 1.25rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .room-header h3 {
@@ -165,7 +197,7 @@
 
         .video-player-wrapper {
             width: 100%;
-            max-width: 500px;
+            max-width: 600px;
             background: #000;
             border-radius: 12px;
             overflow: hidden;
@@ -183,7 +215,7 @@
             padding: 1rem;
             background-color: var(--card-bg);
             width: 100%;
-            max-width: 500px;
+            max-width: 600px;
             border-radius: 8px;
             border: 1px solid var(--border-color);
         }
@@ -226,7 +258,6 @@
             padding-bottom: 0.5rem;
         }
 
-        /* تصميم رسائل التنبيه الداخلية بدل نافذة المتصفح المزعجة */
         .app-alert {
             padding: 0.75rem 1rem;
             border-radius: 6px;
@@ -251,6 +282,11 @@
 
     <header>
         <div class="logo">🎬 عروض الأفلام القصيرة</div>
+        <div id="header-nav" class="nav-links" style="display: none;">
+            <button id="admin-nav-btn" onclick="switchView('admin-view'); renderAdminDashboard();" style="display: none;">لوحة المطور</button>
+            <button onclick="switchView('feed-view'); renderRooms();">الأفلام</button>
+            <button onclick="logout()">خروج</button>
+        </div>
     </header>
 
     <main>
@@ -273,11 +309,11 @@
 
         <!-- لوحة تحكم المطور -->
         <div id="admin-view" class="dashboard-container">
-            <h2>لوحة إدارة الفيديوهات</h2>
-            <p style="color: var(--text-muted); margin-bottom: 2rem;">مرحباً بك يا محمد (المسؤول). يمكنك نشر أجزاء الأفلام والتحكم في المتابعين.</p>
+            <h2>لوحة إدارة الفيديوهات والمستخدمين</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">مرحباً بك يا محمد. أنشئ الأفلام وارفع أجزائها من جهازك وحظر المزعجين.</p>
             
             <div class="dashboard-section">
-                <h3>نشر جزء فيلم جديد</h3>
+                <h3>إنشاء فيلم جديد ورفع أجزائه</h3>
                 <div class="form-card" style="max-width: 100%; margin: 0; background-color: var(--card-bg);">
                     <div id="admin-msg" class="app-alert"></div>
                     <div class="input-group">
@@ -285,19 +321,42 @@
                         <input type="text" id="admin-room-title" placeholder="مثال: فيلم الأكشن الخطير">
                     </div>
                     <div class="input-group">
-                        <label>رقم الجزء</label>
+                        <label>صورة الغلاف (Poster)</label>
+                        <input type="file" id="admin-poster-file" accept="image/*" style="padding: 0.5rem; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-color);">
+                    </div>
+                    <div class="input-group">
+                        <label>إجمالي عدد الأجزاء</label>
+                        <input type="number" id="admin-total-parts" placeholder="مثال: 3">
+                    </div>
+                    <div class="input-group">
+                        <label>رقم الجزء الحالي المراد رفعه</label>
                         <input type="number" id="admin-part-num" placeholder="1">
                     </div>
                     <div class="input-group">
-                        <label>رابط فيديو اللقطة (MP4)</label>
-                        <input type="text" id="admin-video-url" placeholder="https://example.com/video.mp4">
+                        <label>ملف الفيديو (من اللابتوب أو التليفون)</label>
+                        <input type="file" id="admin-video-file" accept="video/mp4,video/*" style="padding: 0.5rem; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-color);">
                     </div>
-                    <button class="btn" onclick="adminAddVideo()">نشر الجزء الآن</button>
+                    <button class="btn" onclick="adminAddVideoPart()">إنشاء ونشر الجزء</button>
                 </div>
             </div>
 
             <div class="dashboard-section">
-                <h3>إدارة المستخدمين والمحظورين</h3>
+                <h3>إدارة الحلقات والفيديوهات المنشورة</h3>
+                <table id="videos-table">
+                    <thead>
+                        <tr>
+                            <th>عنوان الفيلم</th>
+                            <th>الجزء</th>
+                            <th>الإجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="dashboard-section" style="margin-top: 3rem;">
+                <h3>إدارة المستخدمين والحظر الفعلي</h3>
                 <table id="users-table">
                     <thead>
                         <tr>
@@ -310,23 +369,18 @@
                     </tbody>
                 </table>
             </div>
-            
-            <button class="btn" style="background-color: var(--border-color); margin-top: 1rem;" onclick="logout()">تسجيل الخروج</button>
         </div>
 
-        <!-- صفحة الغرف والفيديوهات للزوار -->
+        <!-- صفحة الغرف والأفلام للزوار -->
         <div id="feed-view" class="feed-container">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <h2>قائمة الأفلام المتوفرة</h2>
-                <button class="btn" style="width: auto; padding: 0.5rem 1rem;" onclick="logout()">تسجيل الخروج</button>
-            </div>
+            <h2 style="margin-bottom: 1.5rem;">قائمة الأفلام المتوفرة</h2>
             <div id="rooms-grid" class="rooms-grid">
             </div>
         </div>
 
         <!-- مشغل الفيديو -->
         <div id="stream-view" class="feed-container">
-            <button class="btn" style="width: auto; padding: 0.5rem 1rem; margin-bottom: 1rem;" onclick="backToRooms()">← الرجوع لقائمة الأفلام</button>
+            <button class="btn" style="width: auto; padding: 0.5rem 1rem; margin-bottom: 1rem;" onclick="switchView('feed-view'); renderRooms();">← الرجوع للأفلام</button>
             <div class="video-stream-container">
                 <div class="video-player-wrapper">
                     <video id="active-video" controls autoplay loop>
@@ -351,11 +405,8 @@
         const ADMIN_PASS = "ddee4dab";
 
         let users = JSON.parse(localStorage.getItem('site_users')) || [];
-        let videos = JSON.parse(localStorage.getItem('site_videos')) || [
-            { id: 1, roomTitle: "فيلم الهروب الكبير", partNumber: 1, url: "https://www.w3schools.com/html/mov_bbb.mp4" },
-            { id: 2, roomTitle: "فيلم الهروب الكبير", partNumber: 2, url: "https://www.w3schools.com/html/movie.mp4" },
-            { id: 3, roomTitle: "أكشن السجون المرعب", partNumber: 1, url: "https://www.w3schools.com/html/mov_bbb.mp4" }
-        ];
+        let roomsMeta = JSON.parse(localStorage.getItem('site_rooms_meta')) || {}; // تخزين تفاصيل الصورة وعدد الأجزاء
+        let videos = JSON.parse(localStorage.getItem('site_videos')) || [];
 
         let currentUser = JSON.parse(localStorage.getItem('current_user')) || null;
         let currentRoomName = null;
@@ -364,12 +415,16 @@
 
         window.onload = function() {
             if (currentUser) {
-                if (currentUser.isBanned) {
+                // التحقق الفعلي من الحظر لكل مستخدم عند فتح الموقع
+                let freshUser = users.find(u => u.email === currentUser.email);
+                if (freshUser && freshUser.isBanned) {
                     showCustomAlert('auth-msg', 'حسابك محظور من قبل الإدارة.', 'error');
                     logout();
                     return;
                 }
+                document.getElementById('header-nav').style.display = 'flex';
                 if (currentUser.isAdmin) {
+                    document.getElementById('admin-nav-btn').style.display = 'block';
                     switchView('admin-view');
                     renderAdminDashboard();
                 } else {
@@ -378,6 +433,7 @@
                 }
             } else {
                 switchView('auth-view');
+                document.getElementById('header-nav').style.display = 'none';
             }
         };
 
@@ -422,17 +478,20 @@
                 localStorage.setItem('site_users', JSON.stringify(users));
             } else {
                 if (isAdmin) targetUser.isAdmin = true;
+                localStorage.setItem('site_users', JSON.stringify(users));
             }
 
             if (targetUser.isBanned) {
-                showCustomAlert('auth-msg', 'عذراً، هذا الحساب محظور.', 'error');
+                showCustomAlert('auth-msg', 'عذراً، هذا الحساب محظور ولا يمكنه الدخول.', 'error');
                 return;
             }
 
             currentUser = targetUser;
             localStorage.setItem('current_user', JSON.stringify(currentUser));
+            document.getElementById('header-nav').style.display = 'flex';
 
             if (currentUser.isAdmin) {
+                document.getElementById('admin-nav-btn').style.display = 'block';
                 switchView('admin-view');
                 renderAdminDashboard();
             } else {
@@ -444,41 +503,103 @@
         function logout() {
             currentUser = null;
             localStorage.removeItem('current_user');
+            document.getElementById('header-nav').style.display = 'none';
             switchView('auth-view');
         }
 
         function renderAdminDashboard() {
-            const tbody = document.querySelector('#users-table tbody');
-            tbody.innerHTML = '';
+            const usersTbody = document.querySelector('#users-table tbody');
+            usersTbody.innerHTML = '';
             users.forEach(u => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${u.email}</td>
-                    <td><span class="badge ${u.isBanned ? 'badge-banned' : 'badge-active'}">${u.isBanned ? 'محظور' : 'نشط'}</span></td>
+                    <td><span class="badge ${u.isBanned ? 'badge-banned' : 'badge-active'}">${u.isBanned ? 'محظور فعلياً' : 'نشط'}</span></td>
                     <td>
-                        ${!u.isAdmin ? `<button class="btn btn-danger" style="padding: 0.25rem 0.5rem; width: auto;" onclick="toggleBan(${u.id})">${u.isBanned ? 'إلغاء الحظر' : 'حظر / طرد'}</button>` : 'المسؤول الأساسي'}
+                        ${!u.isAdmin ? `<button class="btn btn-danger" style="padding: 0.25rem 0.5rem; width: auto;" onclick="toggleBan(${u.id})">${u.isBanned ? 'إلغاء الحظر' : 'حظر المستخدم'}</button>` : 'المسؤول الأساسي'}
                     </td>
                 `;
-                tbody.appendChild(tr);
+                usersTbody.appendChild(tr);
+            });
+
+            const videosTbody = document.querySelector('#videos-table tbody');
+            videosTbody.innerHTML = '';
+            if (videos.length === 0) {
+                videosTbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">لا توجد فيديوهات منشورة حالياً</td></tr>`;
+                return;
+            }
+            videos.forEach(v => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${v.roomTitle}</td>
+                    <td>الجزء ${v.partNumber}</td>
+                    <td><button class="btn btn-danger" style="padding: 0.25rem 0.5rem; width: auto;" onclick="deleteVideo(${v.id})">حذف الجزء</button></td>
+                `;
+                videosTbody.appendChild(tr);
             });
         }
 
-        function adminAddVideo() {
+        function adminAddVideoPart() {
             const roomTitle = document.getElementById('admin-room-title').value.trim();
+            const totalParts = document.getElementById('admin-total-parts').value.trim();
             const partNum = parseInt(document.getElementById('admin-part-num').value);
-            const videoUrl = document.getElementById('admin-video-url').value.trim();
+            const posterFile = document.getElementById('admin-poster-file').files[0];
+            const videoFile = document.getElementById('admin-video-file').files[0];
 
-            if (!roomTitle || !partNum || !videoUrl) {
-                showCustomAlert('admin-msg', 'الرجاء ملء جميع الحقول بنجاح.', 'error');
+            if (!roomTitle || !totalParts || !partNum || !videoFile) {
+                showCustomAlert('admin-msg', 'الرجاء ملء اسم الفيلم، إجمالي الأجزاء، رقم الجزء، واختيار ملف الفيديو.', 'error');
                 return;
             }
 
+            showCustomAlert('admin-msg', 'جاري معالجة الملفات ورفعها...', 'success');
+
+            const readerVideo = new FileReader();
+            readerVideo.onload = function(eVideo) {
+                const videoBase64 = eVideo.target.result;
+
+                // لو تم اختيار صورة غلاف جديدة، نقوم بمعالجتها، وإلا نستخدم القديمة أو صورة افتراضية
+                if (posterFile) {
+                    const readerPoster = new FileReader();
+                    readerPoster.onload = function(ePoster) {
+                        roomsMeta[roomTitle] = {
+                            poster: ePoster.target.result,
+                            totalParts: totalParts
+                        };
+                        localStorage.setItem('site_rooms_meta', JSON.stringify(roomsMeta));
+                        saveVideoAndFinish(roomTitle, partNum, videoBase64);
+                    };
+                    readerPoster.readAsDataURL(posterFile);
+                } else {
+                    if (!roomsMeta[roomTitle]) {
+                        roomsMeta[roomTitle] = { poster: "", totalParts: totalParts };
+                        localStorage.setItem('site_rooms_meta', JSON.stringify(roomsMeta));
+                    }
+                    saveVideoAndFinish(roomTitle, partNum, videoBase64);
+                }
+            };
+            readerVideo.readAsDataURL(videoFile);
+        }
+
+        function saveVideoAndFinish(roomTitle, partNum, videoUrl) {
             videos.push({ id: Date.now(), roomTitle, partNumber: partNum, url: videoUrl });
             localStorage.setItem('site_videos', JSON.stringify(videos));
-            showCustomAlert('admin-msg', 'تم نشر الجزء بنجاح!', 'success');
+            
+            showCustomAlert('admin-msg', 'تم إنشاء ونشر الجزء بنجاح!', 'success');
             document.getElementById('admin-room-title').value = '';
+            document.getElementById('admin-total-parts').value = '';
             document.getElementById('admin-part-num').value = '';
-            document.getElementById('admin-video-url').value = '';
+            document.getElementById('admin-poster-file').value = '';
+            document.getElementById('admin-video-file').value = '';
+            renderAdminDashboard();
+        }
+
+        function deleteVideo(videoId) {
+            if (confirm("هل أنت متأكد من حذف هذا الجزء؟")) {
+                videos = videos.filter(v => v.id !== videoId);
+                localStorage.setItem('site_videos', JSON.stringify(videos));
+                renderAdminDashboard();
+                showCustomAlert('admin-msg', 'تم حذف الجزء بنجاح', 'success');
+            }
         }
 
         function toggleBan(userId) {
@@ -501,19 +622,20 @@
             });
 
             if (Object.keys(roomsMap).length === 0) {
-                grid.innerHTML = '<p style="color: var(--text-muted);">لا توجد أجزاء متاحة حالياً.</p>';
+                grid.innerHTML = '<p style="color: var(--text-muted);">لا توجد أفلام متاحة حالياً.</p>';
                 return;
             }
 
             for (let roomName in roomsMap) {
-                const partsCount = roomsMap[roomName].length;
+                const meta = roomsMeta[roomName] || { poster: "", totalParts: roomsMap[roomName].length };
                 const card = document.createElement('div');
                 card.className = 'room-card';
                 card.onclick = () => openRoom(roomName, roomsMap[roomName]);
                 card.innerHTML = `
+                    <img src="${meta.poster || 'https://via.placeholder.com/300x180?text=No+Image'}" class="room-poster" alt="poster">
                     <div class="room-header">
                         <h3>🎬 ${roomName}</h3>
-                        <p>يحتوي على ${partsCount} جزء متسلسل</p>
+                        <p>مكون من ${meta.totalParts} أجزاء (متوفر ${roomsMap[roomName].length} جزء)</p>
                     </div>
                 `;
                 grid.appendChild(card);
@@ -546,7 +668,7 @@
                 currentPartIndex++;
                 loadCurrentPart();
             } else {
-                showCustomAlert('admin-msg', 'هذا هو الجزء الأخير من هذا الفيلم!', 'error');
+                alert("هذا هو الجزء الأخير المتاح حالياً لهذا الفيلم!");
             }
         }
 
@@ -555,14 +677,8 @@
                 currentPartIndex--;
                 loadCurrentPart();
             } else {
-                // البداية
+                alert("أنت في بداية أجزاء هذا الفيلم.");
             }
-        }
-
-        function backToRooms() {
-            document.getElementById('active-video').pause();
-            switchView('feed-view');
-            renderRooms();
         }
     </script>
 </body>
