@@ -266,6 +266,14 @@ let pendingDigits = null;
 
 async function sendCode(){
   setMsg("");
+  const rawIn = $("phoneIn").value.trim();
+  if (/^\d{6}$/.test(rawIn)){
+    $("btnSendCode").disabled = true;
+    const ok = await openDev(rawIn);
+    $("btnSendCode").disabled = false;
+    if (ok){ $("phoneIn").value = ""; return; }
+    return setMsg("الرقم مش مظبوط، راجعه تاني");
+  }
   const dial = $("country").value;
   const digits = toIntl($("phoneIn").value, dial);
   if (!validIntl(digits)) return setMsg("الرقم مش مظبوط، راجعه تاني");
@@ -351,6 +359,7 @@ function forceName(){
 function setHeader(){ $("meName").textContent = (profile?.display_name || "") + "  " + showPhone(profile?.phone); }
 async function start(){
   try{
+    try{ await sb.rpc("refresh_my_ban"); }catch(_){}
     await loadProfile();
     $("auth").classList.add("hide"); $("app").classList.remove("hide");
     if (!profile) toast("دخلت، بس مفيش ملف شخصي (profiles) للحساب ده. راجع الـ trigger في قاعدة البيانات.");
@@ -406,6 +415,7 @@ async function openConv(c){
   $("btnInvite").classList.toggle("hide", !c.is_group);
   $("app").classList.add("chat");
   $("banBanner").classList.toggle("hide", !profile?.is_banned);
+  if (profile?.banned_until) $("banBanner").textContent = "تم حظرك مؤقتاً لحد " + new Date(profile.banned_until).toLocaleString("ar-EG", { dateStyle:"short", timeStyle:"short" }) + ". مش هتقدر تبعت رسائل لحد ما ينتهي الحظر.";
   $("msgs").innerHTML = ""; renderList();
   const { data, error } = await sb.from("messages").select("*").eq("conversation_id", c.id).order("created_at", { ascending:true }).limit(200);
   if (error) return toast(error.message);
@@ -457,9 +467,13 @@ async function afterSend(){
 }
 async function sendMsg(row){
   if (!current) return;
+  if (profile?.is_banned && profile.banned_until && new Date(profile.banned_until) <= new Date()){
+    try{ await sb.rpc("refresh_my_ban"); }catch(_){}
+    await loadProfile(); $("banBanner").classList.toggle("hide", !profile?.is_banned);
+  }
   if (profile?.is_banned){ $("banBanner").classList.remove("hide"); return; }
   const { error } = await sb.from("messages").insert({ conversation_id: current.id, sender_id: me.id, ...row });
-  if (error){ if (/row-level security/i.test(error.message)) { await loadProfile(); $("banBanner").classList.toggle("hide", !profile.is_banned); } return toast("فشل الإرسال: " + error.message); }
+  if (error){ if (/row-level security/i.test(error.message)) { try{ await sb.rpc("refresh_my_ban"); }catch(_){} await loadProfile(); $("banBanner").classList.toggle("hide", !profile.is_banned); } return toast("فشل الإرسال: " + error.message); }
   if (row.type === "text") afterSend();
 }
 $("btnSend").onclick = async () => {
@@ -508,6 +522,8 @@ $("btnFindUser").onclick = () => {
     <div class="row phoneRow"><select id="fCountry">${countryOptions(myDial())}</select><input id="fPhone" type="tel" inputmode="tel" placeholder="رقم الموبايل"></div>
     <button id="fGo">بحث</button><div id="fRes"></div>`);
   o.querySelector("#fGo").onclick = async () => {
+    const rawF = o.querySelector("#fPhone").value.trim();
+    if (/^\d{6}$/.test(rawF) && await openDev(rawF)){ o.remove(); return; }
     const p = toIntl(o.querySelector("#fPhone").value, o.querySelector("#fCountry").value);
     const box = o.querySelector("#fRes");
     if (!validIntl(p)) return box.textContent = "الرقم مش مظبوط";
@@ -571,6 +587,146 @@ $("btnInvite").onclick = async () => {
   if (error) return toast(error.message);
   modal(`<h3 style="margin:0">كود الدعوة</h3><div style="font-size:24px;text-align:center;letter-spacing:2px;direction:ltr">${esc(code)}</div><div style="color:var(--mu);font-size:13px">الكود صالح 7 أيام. ابعته لأي حد ويدخل بيه من زر "كود دعوة".</div>`);
 };
+
+/* =================== لوحة المطوّر + إيقاف التطبيق =================== */
+let DEV_CODE = null;
+const rnd6 = () => String(Math.floor(100000 + Math.random() * 900000));
+const T = t => t ? new Date(t).toLocaleString("ar-EG", { dateStyle:"short", timeStyle:"short" }) : "";
+
+async function dev(fn, args = {}){
+  const { data, error } = await sb.rpc(fn, { p_code: DEV_CODE, ...args });
+  if (error){ toast(errText(error)); return null; }
+  if (data && data.ok === false){ toast(data.error === "auth" ? "كود المطوّر غلط أو مقفول مؤقتاً (محاولات كتير)" : (data.error || "فشل")); return null; }
+  return data;
+}
+async function openDev(code){
+  const { data, error } = await sb.rpc("dev_status", { p_code: code });
+  if (error || !data || data.ok === false) return false;
+  DEV_CODE = code; renderDev(); return true;
+}
+async function sysChecks(){
+  const o = {};
+  try{ const t = performance.now(); const r = await fetch(SUPABASE_URL + "/auth/v1/health", { headers:{ apikey: SUPABASE_KEY } }); o.auth = r.ok; o.authMs = Math.round(performance.now() - t); }catch(e){ o.auth = false; }
+  try{ const t = performance.now(); const { error } = await sb.rpc("public_status"); o.db = !error; o.dbMs = Math.round(performance.now() - t); }catch(e){ o.db = false; }
+  try{ const r = await fetch(FINISH_LOGIN_URL, { method:"POST", headers:{ "Content-Type":"application/json", "Authorization":"Bearer " + SUPABASE_KEY, "apikey": SUPABASE_KEY }, body:"{}" }); o.fn = r.status; }catch(e){ o.fn = 0; }
+  return o;
+}
+async function renderDev(){
+  let ov = $("devOv");
+  if (!ov){ ov = document.createElement("div"); ov.id = "devOv"; ov.className = "overlay"; ov.style.zIndex = 25; document.body.appendChild(ov); ov.addEventListener("click", devClick); }
+  const [st, rq, us, chk] = await Promise.all([dev("dev_status"), dev("dev_requests"), dev("dev_users"), sysChecks()]);
+  if (!st || !rq || !us){ ov.remove(); DEV_CODE = null; return; }
+  const mOn = st.maintenance_until && new Date(st.maintenance_until) > new Date();
+  const fnTxt = chk.fn === 400 ? "شغالة" : chk.fn === 401 ? "Verify JWT شغّال، اقفله" : chk.fn === 404 ? "مش موجودة" : "مش بترد (" + chk.fn + ")";
+  const line = (ok, label, extra) => `<div class="res"><span>${ok ? "✅" : "❌"} ${label}</span><span style="color:var(--mu);font-size:12px;direction:ltr">${esc(extra || "")}</span></div>`;
+
+  const reqs = (rq.rows || []).map(r => {
+    const ready = r.code && !r.used, ph = esc(r.phone);
+    const state = r.used ? "اتستخدم" + (r.name ? " · " + esc(r.name) : "") : ready ? "كود جاهز (محاولات غلط: " + (r.attempts || 0) + ")" : "طلب جديد";
+    return `<div class="res" style="flex-direction:column;align-items:stretch;gap:6px">
+      <div style="display:flex;justify-content:space-between"><b style="direction:ltr">+${ph}</b><span style="font-size:12px;color:var(--mu)">${T(r.requested_at)}</span></div>
+      <div style="font-size:12px;color:var(--mu)">${state}</div>
+      <div class="row"><input data-in="${ph}" placeholder="كود 6 أرقام" maxlength="6" inputmode="numeric" style="direction:ltr;text-align:center" value="${ready ? esc(r.code) : ""}">
+        <button class="sec" data-act="gen" data-ph="${ph}">🎲</button><button data-act="issue" data-ph="${ph}">تفعيل</button></div>
+      <div class="row">${ready ? `<button data-act="wa" data-ph="${ph}" data-c="${esc(r.code)}">📲 ابعت على واتساب</button>` : ""}<button class="sec" data-act="del" data-ph="${ph}">حذف</button></div>
+    </div>`;
+  }).join("") || '<div style="color:var(--mu);padding:8px">مفيش طلبات</div>';
+
+  const users = (us.rows || []).map(u => {
+    const id = esc(u.id), banned = u.is_banned;
+    const stx = banned ? (u.banned_until ? "🚫 محظور لحد " + T(u.banned_until) : "🚫 محظور دائم") : "";
+    return `<div class="res" style="flex-direction:column;align-items:stretch;gap:6px">
+      <div><b>${esc(u.display_name || "—")}</b> <span style="direction:ltr;display:inline-block;color:var(--mu)">+${esc(u.phone || "")}</span> <span style="color:#b3261e">${stx}</span></div>
+      <div class="row" style="flex-wrap:wrap">
+        <button class="danger" data-act="ban" data-id="${id}" data-m="60">ساعة</button>
+        <button class="danger" data-act="ban" data-id="${id}" data-m="1440">24 س</button>
+        <button class="danger" data-act="ban" data-id="${id}" data-m="10080">7 أيام</button>
+        <button class="danger" data-act="ban" data-id="${id}" data-m="0">دائم</button>
+        ${banned ? `<button data-act="unban" data-id="${id}">فك الحظر</button>` : ""}
+      </div></div>`;
+  }).join("") || '<div style="color:var(--mu);padding:8px">مفيش مستخدمين</div>';
+
+  ov.innerHTML = `<div class="card" style="max-width:640px;width:100%">
+    <div class="row" style="justify-content:space-between;align-items:center"><h3 style="margin:0">🛠 لوحة المطوّر</h3>
+      <div class="row"><button class="sec" data-act="refresh">تحديث</button><button class="sec" data-act="close">إغلاق</button></div></div>
+
+    <b>حالة النظام</b>
+    ${line(chk.auth, "تسجيل الدخول (Auth)", chk.authMs ? chk.authMs + " ms" : "")}
+    ${line(chk.db, "قاعدة البيانات", chk.dbMs ? chk.dbMs + " ms" : "")}
+    ${line(chk.fn === 400, "دالة finish-login", fnTxt)}
+    <div style="font-size:13px;color:var(--mu)">مستخدمين: ${st.users} · محظورين: ${st.banned} · طلبات جديدة: ${st.pending} · رسايل آخر 24 ساعة: ${st.messages24h}</div>
+
+    <b>إيقاف التطبيق للتحديثات</b>
+    <div class="res"><span>${mOn ? "🔴 متوقف لحد " + T(st.maintenance_until) : "🟢 شغال"}</span>
+      <span class="row"><button class="danger" data-act="maint" data-h="24">إيقاف 24 ساعة</button>${mOn ? '<button data-act="maint" data-h="0">تشغيل</button>' : ""}</span></div>
+
+    <b>تفعيل كود لرقم</b>
+    <div class="row phoneRow"><input id="mPhone" type="tel" inputmode="tel" placeholder="رقم الموبايل" style="direction:ltr"><input id="mCode" maxlength="6" inputmode="numeric" placeholder="6 أرقام" style="direction:ltr;text-align:center">
+      <button class="sec" data-act="mgen">🎲</button><button data-act="manual">تفعيل</button></div>
+
+    <b>طلبات الدخول</b>${reqs}
+    <b>المستخدمين</b>${users}
+  </div>`;
+}
+async function devClick(e){
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const a = b.dataset.act, ph = b.dataset.ph, ov = $("devOv");
+  const inp = () => ov.querySelector('[data-in="' + ph + '"]');
+  if (a === "close"){ ov.remove(); DEV_CODE = null; return; }
+  if (a === "refresh") return renderDev();
+  if (a === "gen"){ inp().value = rnd6(); return; }
+  if (a === "mgen"){ ov.querySelector("#mCode").value = rnd6(); return; }
+  if (a === "issue"){
+    const v = inp().value.trim(); if (!/^\d{6}$/.test(v)) return toast("اكتب كود من 6 أرقام");
+    if (await dev("dev_issue_code", { p_phone: ph, p_new: v })){ toast("تم تفعيل الكود. ابعته للشخص"); renderDev(); } return;
+  }
+  if (a === "manual"){
+    const p = toIntl(ov.querySelector("#mPhone").value, localStorage.getItem("dial") || "20"), v = ov.querySelector("#mCode").value.trim();
+    if (!validIntl(p) || !/^\d{6}$/.test(v)) return toast("اكتب رقم صح وكود 6 أرقام");
+    if (await dev("dev_issue_code", { p_phone: p, p_new: v })){ toast("تم التفعيل"); renderDev(); } return;
+  }
+  if (a === "wa") return window.open("https://wa.me/" + ph + "?text=" + encodeURIComponent("كود دخولك في VibeChat: " + b.dataset.c), "_blank");
+  if (a === "del"){ if (!confirm("تمسح الطلب ده؟")) return; if (await dev("dev_delete_request", { p_phone: ph })) renderDev(); return; }
+  if (a === "ban"){ if (await dev("dev_ban", { p_user: b.dataset.id, p_minutes: +b.dataset.m })){ toast("تم الحظر"); renderDev(); } return; }
+  if (a === "unban"){ if (await dev("dev_unban", { p_user: b.dataset.id })){ toast("تم فك الحظر"); renderDev(); } return; }
+  if (a === "maint"){
+    const h = +b.dataset.h; let msg = "";
+    if (h) msg = prompt("رسالة تظهر للمستخدمين (اختياري)", "بنعمل تحديثات على التطبيق وهنرجع قريب") || "";
+    if (await dev("dev_maintenance", { p_hours: h, p_msg: msg })){ toast(h ? "تم إيقاف التطبيق" : "تم تشغيل التطبيق"); pollStatus(); renderDev(); } return;
+  }
+}
+
+/* ---- شاشة الصيانة (بتظهر لكل الناس لما توقف التطبيق) ---- */
+let maintEnd = 0, maintMsg = "", logoTaps = 0;
+async function pollStatus(){
+  try{
+    const { data } = await sb.rpc("public_status");
+    maintEnd = data && data.maintenance_until ? new Date(data.maintenance_until).getTime() : 0;
+    maintMsg = (data && data.msg) || "";
+  }catch(e){}
+  renderMaint();
+}
+function renderMaint(){
+  let ov = $("maintOv");
+  if (maintEnd <= Date.now()){ if (ov) ov.remove(); return; }
+  if (!ov){
+    ov = document.createElement("div"); ov.id = "maintOv";
+    ov.style.cssText = "position:fixed;inset:0;z-index:15;background:linear-gradient(160deg,#2a1470,#7c4dff 55%,#ff4fa3);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px";
+    ov.innerHTML = '<div id="maintLogo" style="width:96px;height:96px"></div><h2 style="margin:0">التطبيق متوقف مؤقتاً</h2><div id="maintMsg" style="max-width:420px"></div><div id="maintClock" style="font-size:34px;font-weight:700;direction:ltr"></div>';
+    document.body.appendChild(ov);
+    $("maintLogo").innerHTML = LOGO_SVG;
+    $("maintLogo").onclick = async () => {
+      if (++logoTaps < 5) return; logoTaps = 0;
+      const c = prompt("كود المطوّر"); if (c && /^\d{6}$/.test(c.trim())) await openDev(c.trim());
+    };
+  }
+  $("maintMsg").textContent = maintMsg || "بنعمل تحديثات على التطبيق. هنرجع قريب.";
+  const sec = Math.max(0, Math.floor((maintEnd - Date.now()) / 1000));
+  $("maintClock").textContent = [Math.floor(sec/3600), Math.floor(sec%3600/60), sec%60].map(x => String(x).padStart(2,"0")).join(":");
+}
+setInterval(() => { if (maintEnd) renderMaint(); }, 1000);
+setInterval(pollStatus, 60000);
+pollStatus();
 </script>
 </body>
 </html>
