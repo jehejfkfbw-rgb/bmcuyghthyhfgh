@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
@@ -31,12 +30,7 @@
   .row{display:flex;gap:8px}
   .phoneRow select{flex:0 0 42%}
   .phoneRow input{direction:ltr;text-align:left}
-  
-  /* تصميم 6 خانات لإدخال كود OTP */
-  .otp-container { display: flex; gap: 8px; justify-content: center; direction: ltr; margin: 10px 0; }
-  .otp-input { width: 45px; height: 50px; text-align: center; font-size: 22px; font-weight: bold; border-radius: 8px; border: 1.5px solid var(--bd); }
-  .otp-input:focus { border-color: var(--g); outline: none; box-shadow: 0 0 5px rgba(124,77,255,0.4); }
-
+  #otpIn{direction:ltr;text-align:center;font-size:24px;letter-spacing:8px}
   #app{display:flex;height:100%}
   #side{width:340px;max-width:100%;background:#fff;border-inline-start:1px solid var(--bd);display:flex;flex-direction:column}
   #main{flex:1;display:flex;flex-direction:column;background:var(--bg);min-width:0}
@@ -79,11 +73,14 @@
     #app.chat #side{display:none}
     .back{display:inline-block}
   }
+  .otp{display:flex;gap:8px;justify-content:center;direction:ltr}
+  .otp input{width:44px;height:54px;padding:0;text-align:center;font-size:22px;font-weight:700;border-radius:10px}
+  .errSmall{font-size:11px;color:#8a8aa0;direction:ltr;text-align:center;word-break:break-all}
 </style>
 </head>
 <body>
 
-<!-- ============ شاشة الدخول ============ -->
+<!-- ============ شاشة الدخول (دخول فقط، من غير إنشاء حساب) ============ -->
 <div id="auth">
   <div class="card">
     <div class="brand">
@@ -101,18 +98,8 @@
     </div>
 
     <div id="step2" class="hide" style="display:flex;flex-direction:column;gap:12px">
-      <div style="color:var(--mu);font-size:14px;text-align:center">أدخل الكود المكون من 6 أرقام لـ <b id="sentTo" style="direction:ltr;display:inline-block"></b></div>
-      
-      <!-- 6 خانات إدخال الكود -->
-      <div class="otp-container">
-        <input type="text" maxlength="1" class="otp-input" inputmode="numeric">
-        <input type="text" maxlength="1" class="otp-input" inputmode="numeric">
-        <input type="text" maxlength="1" class="otp-input" inputmode="numeric">
-        <input type="text" maxlength="1" class="otp-input" inputmode="numeric">
-        <input type="text" maxlength="1" class="otp-input" inputmode="numeric">
-        <input type="text" maxlength="1" class="otp-input" inputmode="numeric">
-      </div>
-
+      <div style="color:var(--mu);font-size:14px;text-align:center">اتبعت كود على <b id="sentTo" style="direction:ltr;display:inline-block"></b></div>
+      <div class="otp" id="otpBox" dir="ltr"></div>
       <button id="btnVerify">دخول</button>
       <div class="row">
         <button class="link" id="btnResend" disabled>إعادة الإرسال</button>
@@ -130,7 +117,6 @@
     <div class="top">
       <span class="logo"></span>
       <div class="name" id="meName"></div>
-      <button id="btnDev" class="sec" title="لوحة المطور">🛠️</button>
       <button id="btnMe" title="بياناتي">⚙</button>
       <button id="btnOut" title="خروج">خروج</button>
     </div>
@@ -170,14 +156,13 @@
 const APP_NAME = "VibeChat";
 const SUPABASE_URL = "https://iaoswqgkjxfbnfbsnqou.supabase.co";
 const SUPABASE_KEY = "sb_publishable_z7Oaiz99ftTYdBWsyR65Bw_BWPDR_XH";
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// بيانات CallMeBot لارسال واتساب المباشر
-const CALLMEBOT_PHONE = "201102464297";
-const CALLMEBOT_APIKEY = "2586712";
-
-// الرقم المخصص للمطور الذي يدخل مباشرة
-const DEV_PHONE = "201213783090";
+// بعض بيئات المعاينة/الإضافات بتعدّل fetch وبتبعت الطلب عبر postMessage، وده بيفشل لو الهيدرز كائن Headers.
+// بنحوّله لكائن عادي قبل الإرسال عشان يتخطى المشكلة دي.
+const safeFetch = (url, opts = {}) => {
+  if (opts.headers instanceof Headers){ const h = {}; opts.headers.forEach((v, k) => { h[k] = v; }); opts = { ...opts, headers: h }; }
+  return fetch(url, opts);
+};
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { global: { fetch: safeFetch } });
 
 const COUNTRIES = [
   { n:"مصر",      d:"20"  },
@@ -187,18 +172,18 @@ const COUNTRIES = [
   { n:"الأردن",   d:"962" },
 ];
 
-/* ---------- الشعار ---------- */
+/* ---------- الشعار (فقاعة محادثة بموجات صوت) ---------- */
 const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c4dff"/><stop offset="1" stop-color="#ff4fa3"/></linearGradient></defs><rect width="120" height="120" rx="28" fill="url(#lg)"/><rect x="21" y="24" width="78" height="56" rx="26" fill="#fff"/><path d="M38 76 L28 100 L58 80 Z" fill="#fff"/><g fill="#7c4dff"><rect x="34" y="44" width="8" height="16" rx="4"/><rect x="45" y="38" width="8" height="28" rx="4"/><rect x="56" y="32" width="8" height="40" rx="4" fill="#ff4fa3"/><rect x="67" y="40" width="8" height="24" rx="4"/><rect x="78" y="46" width="8" height="12" rx="4"/></g></svg>`;
 document.querySelectorAll(".logo").forEach(e => e.innerHTML = LOGO_SVG);
 document.querySelectorAll(".appName").forEach(e => e.innerHTML = 'Vibe<span class="c">Chat</span>');
 document.title = APP_NAME;
 document.getElementById("fav").href = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(LOGO_SVG);
 
-const \$ = id => document.getElementById(id);
+const $ = id => document.getElementById(id);
 let me = null, profile = null, current = null, convs = [], names = {}, channel = null;
 
 function esc(s){ return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
-function toast(t){ const e=\$("toast"); e.textContent=t; e.classList.remove("hide"); clearTimeout(toast.t); toast.t=setTimeout(()=>e.classList.add("hide"),4500); }
+function toast(t){ const e=$("toast"); e.textContent=t; e.classList.remove("hide"); clearTimeout(toast.t); toast.t=setTimeout(()=>e.classList.add("hide"),4500); }
 function modal(html, closable = true){
   const o = document.createElement("div"); o.className="overlay";
   o.innerHTML = `<div class="card">${html}${closable ? '<button class="sec" data-close>إغلاق</button>' : ''}</div>`;
@@ -206,39 +191,11 @@ function modal(html, closable = true){
   document.body.appendChild(o); return o;
 }
 
-/* ---------- التنقل بين خانات 6 أرقام ---------- */
-const otpInputs = document.querySelectorAll('.otp-input');
-otpInputs.forEach((input, index) => {
-  input.addEventListener('input', (e) => {
-    if (e.target.value.length === 1 && index < otpInputs.length - 1) {
-      otpInputs[index + 1].focus();
-    }
-  });
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Backspace' && !e.target.value && index > 0) {
-      otpInputs[index - 1].focus();
-    }
-  });
-});
-
-function getOtpValue() {
-  let val = "";
-  otpInputs.forEach(i => val += i.value);
-  return val.trim();
-}
-
-/* ---------- إرسال رسالة الواتساب للأدمن ---------- */
-async function sendToWhatsApp(phone) {
-  const text = encodeURIComponent(`🚨 طلب كود دخول جديد على VibeChat!\nرقم الموبايل: +${phone}`);
-  const url = `https://api.callmebot.com/whatsapp.php?phone=${CALLMEBOT_PHONE}&text=${text}&apikey=${CALLMEBOT_APIKEY}`;
-  try {
-    fetch(url, { mode: 'no-cors' });
-  } catch(e) { console.log(e); }
-}
-
+/* ---------- الأرقام (مصر، السعودية، اليمن، العراق، الأردن) ---------- */
 function countryOptions(sel){
   return COUNTRIES.map(c => `<option value="${c.d}" ${c.d===sel?"selected":""}>${c.n} (+${c.d})</option>`).join("");
 }
+// يرجّع الرقم بصيغة دولية أرقام بس (من غير +)، مثال: 201012345678
 function toIntl(raw, dial){
   let s = String(raw||"").trim().replace(/[\s\-()‎‏]/g,"");
   s = s.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
@@ -257,103 +214,114 @@ function myDial(){
 }
 function showPhone(p){ return p ? "+" + p : ""; }
 
-\$("country").innerHTML = countryOptions(localStorage.getItem("dial") || "20");
+/* ---------- تسجيل الدخول بالرقم + OTP ---------- */
+$("country").innerHTML = countryOptions(localStorage.getItem("dial") || "20");
 let pendingPhone = null, resendTimer = null;
-function setMsg(t){ \$("aMsg").textContent = t || ""; }
+function setMsg(t){ $("aMsg").textContent = t || ""; }
 function showStep(n){
-  $("step1").classList.toggle("hide", n!==1); $("step1style").style.display = n===1 ? "flex" : "none";
+  $("step1").classList.toggle("hide", n!==1); $("step1").style.display = n===1 ? "flex" : "none";
   $("step2").classList.toggle("hide", n!==2); $("step2").style.display = n===2 ? "flex" : "none";
 }
 showStep(1);
-
+const otpInputs = () => [...$("otpBox").children];
+const getOtp = () => otpInputs().map(i => i.value).join("");
+const clearOtp = () => otpInputs().forEach(i => i.value = "");
+const focusOtp = () => otpInputs()[0] && otpInputs()[0].focus();
+(function buildOtp(){
+  const box = $("otpBox");
+  for (let i = 0; i < 6; i++){
+    const x = document.createElement("input");
+    x.maxLength = 1; x.inputMode = "numeric"; x.autocomplete = "one-time-code"; box.appendChild(x);
+    x.addEventListener("input", () => {
+      x.value = x.value.replace(/\D/g, "");
+      if (x.value && i < 5) box.children[i+1].focus();
+      if (getOtp().length === 6) verify();
+    });
+    x.addEventListener("keydown", e => { if (e.key === "Backspace" && !x.value && i > 0) box.children[i-1].focus(); });
+    x.addEventListener("paste", e => {
+      const t = (e.clipboardData.getData("text") || "").replace(/\D/g, "").slice(0, 6); if (!t) return;
+      e.preventDefault(); [...t].forEach((d, k) => box.children[k].value = d);
+      box.children[Math.min(t.length, 5)].focus(); if (t.length === 6) verify();
+    });
+  }
+})();
+function errText(e){
+  const m = (e && e.message) || "حصلت مشكلة";
+  const c = e && (e.code || e.status);
+  if (c === "PGRST202" || /could not find the function/i.test(m)) return "الدالة مش موجودة في قاعدة البيانات (" + m + ")";
+  if (c === "42501" || /permission denied/i.test(m)) return "مفيش صلاحية على الدالة دي في Supabase (" + m + ")";
+  return m + (c ? " (" + c + ")" : "");
+}
 function startResendTimer(){
-  let left = 40; \$("btnResend").disabled = true;
+  let left = 40; $("btnResend").disabled = true;
   clearInterval(resendTimer);
   resendTimer = setInterval(() => {
-    left--; \$("btnResend").textContent = left > 0 ? `إعادة الإرسال (${left})` : "إعادة الإرسال";
-    if (left <= 0){ clearInterval(resendTimer); \$("btnResend").disabled = false; }
+    left--; $("btnResend").textContent = left > 0 ? `إعادة الإرسال (${left})` : "إعادة الإرسال";
+    if (left <= 0){ clearInterval(resendTimer); $("btnResend").disabled = false; }
   }, 1000);
-  \$("btnResend").textContent = `إعادة الإرسال (${left})`;
+  $("btnResend").textContent = `إعادة الإرسال (${left})`;
 }
-
 const FINISH_LOGIN_URL = SUPABASE_URL + "/functions/v1/finish-login";
 let pendingDigits = null;
 
 async function sendCode(){
   setMsg("");
-  const dial = \$("country").value;
-  const digits = toIntl(\$("phoneIn").value, dial);
+  const dial = $("country").value;
+  const digits = toIntl($("phoneIn").value, dial);
   if (!validIntl(digits)) return setMsg("الرقم مش مظبوط، راجعه تاني");
-  
-  \$("btnSendCode").disabled = true;
-
-  // فحص ما إذا كان الرقم هو رقم المطور الخاص بك
-  if (digits === DEV_PHONE) {
-    // محاولة جلب حساب المطور وتخطّي الكود مباشرة أو إدخال كود وهمي مسبق لتسجيل الدخول
-    try {
-      // نفترض أن المطور مسجل مسبقاً أو نقوم بتسجيله بدخل مباشر، سنحاول إتمام الدخول عبر كود افتراضي مسجل أو إشعار
-      // للتسهيل الفوري للمطور: سنقوم بتوجيهه مباشرة للوحة التحكم عبر محاكاة تسجيل دخول سريعة
-      const res = await fetch(FINISH_LOGIN_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SUPABASE_KEY, "apikey": SUPABASE_KEY },
-        body: JSON.stringify({ phone: digits, code: "000000" }), // كود افتراضي للمطور لو تم ضبطه، أو يمكنه استخدام الخطوات العادية
-      });
-      const body = await res.json();
-      if (res.ok) {
-        const { error } = await sb.auth.signInWithPassword({ email: body.email, password: body.password });
-        if (!error) return;
-      }
-    } catch(e) {}
-  }
-
-  // 1. إرسال إشعار على الواتساب للأرقام العادية
-  await sendToWhatsApp(digits);
-
-  // 2. طلب كود من السيرفر
+  $("btnSendCode").disabled = true;
   const { error } = await sb.rpc("request_login_code", { p_phone: digits });
-  \$("btnSendCode").disabled = false;
-  if (error) return setMsg(error.message);
-  
+  $("btnSendCode").disabled = false;
+  if (error) return setMsg(errText(error));
   pendingDigits = digits; pendingPhone = "+" + digits; localStorage.setItem("dial", dial);
-  \$("sentTo").textContent = "+" + digits; 
-  otpInputs.forEach(i => i.value = "");
-  showStep(2); startResendTimer(); otpInputs[0].focus();
-  setMsg("تم إرسال الطلب، سيصلك الكود قريباً.");
+  $("sentTo").textContent = "+" + digits; clearOtp();
+  showStep(2); startResendTimer(); focusOtp();
+  setMsg("طلبك وصل لفريق الدعم، هيبعتولك الكود على رقمك خلال شوية.");
 }
-\$("btnSendCode").onclick = sendCode;
-\$("phoneIn").addEventListener("keydown", e => { if (e.key === "Enter") sendCode(); });
-
-\$("btnResend").onclick = async () => {
+$("btnSendCode").onclick = sendCode;
+$("phoneIn").addEventListener("keydown", e => { if (e.key === "Enter") sendCode(); });
+$("btnResend").onclick = async () => {
   if (!pendingDigits) return;
   setMsg("");
-  await sendToWhatsApp(pendingDigits);
   const { error } = await sb.rpc("request_login_code", { p_phone: pendingDigits });
-  if (error) return setMsg(error.message);
-  toast("تم إعادة إرسال الطلب عبر الواتساب"); startResendTimer();
+  if (error) return setMsg(errText(error));
+  toast("اتبعت طلب تاني لفريق الدعم"); startResendTimer();
 };
-
-\$("btnChange").onclick = () => { setMsg(""); showStep(1); };
-
+$("btnChange").onclick = () => { setMsg(""); showStep(1); };
+let verifying = false;
 async function verify(){
+  if (verifying) return;
   setMsg("");
-  const token = getOtpValue();
-  if (token.length !== 6) return setMsg("اكتب الكود المكون من 6 أرقام كاملة");
-  \$("btnVerify").disabled = true;
+  const token = getOtp();
+  if (token.length < 6) return setMsg("اكتب الكود كامل (6 أرقام)");
+  if (!pendingDigits) return setMsg("ابدأ من أول: اكتب رقمك واطلب الكود");
+  verifying = true; $("btnVerify").disabled = true;
   try{
     const res = await fetch(FINISH_LOGIN_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SUPABASE_KEY, "apikey": SUPABASE_KEY },
       body: JSON.stringify({ phone: pendingDigits, code: token }),
     });
-    const body = await res.json();
-    if (!res.ok) { setMsg(body.error || "الكود غلط أو انتهت صلاحيته"); return; }
+    const raw = await res.text(); let body = {}; try{ body = JSON.parse(raw); }catch(_){}
+    if (!res.ok){
+      console.error("finish-login", res.status, raw);
+      const msg = body.error || body.message || "";
+      if (res.status === 401 || /jwt/i.test(msg)) setMsg("السيرفر رفض الطلب (401). لازم تقفل خيار Verify JWT في دالة finish-login من لوحة Supabase، وبعدها جرب تاني.");
+      else if (res.status === 404) setMsg("دالة finish-login مش موجودة على السيرفر.");
+      else if (res.status >= 500) setMsg("في مشكلة جوه الدالة على السيرفر (" + res.status + "): " + (msg || raw.slice(0, 120)));
+      else setMsg((body.error || "الكود غلط أو انتهت صلاحيته") + " (" + res.status + ")");
+      clearOtp(); focusOtp(); return;
+    }
+    if (!body.email || !body.password){ console.error("finish-login body", raw); return setMsg("الدالة ردّت من غير بيانات الدخول (email/password). راجع كود finish-login."); }
     const { error } = await sb.auth.signInWithPassword({ email: body.email, password: body.password });
-    if (error) setMsg(error.message);
-  }catch(e){ setMsg("في مشكلة في الاتصال، حاول تاني"); }
-  finally{ \$("btnVerify").disabled = false; }
+    if (error){ console.error(error); setMsg(errText(error)); clearOtp(); }
+  }catch(e){
+    console.error(e);
+    setMsg("مفيش اتصال بالدالة (غالباً CORS أو النت). افتح التطبيق من لينك مرفوع وراجع إعدادات finish-login.");
+  }finally{ verifying = false; $("btnVerify").disabled = false; }
 }
-\$("btnVerify").onclick = verify;
-\$("btnOut").onclick = async () => { await sb.auth.signOut(); location.reload(); };
+$("btnVerify").onclick = verify;
+$("btnOut").onclick = async () => { await sb.auth.signOut(); location.reload(); };
 
 sb.auth.onAuthStateChange((_e, session) => {
   if (session && !me){ me = session.user; start(); }
@@ -361,10 +329,10 @@ sb.auth.onAuthStateChange((_e, session) => {
 sb.auth.getSession().then(({data}) => { if (data.session && !me){ me = data.session.user; start(); } });
 
 async function loadProfile(){
-  const { data } = await sb.from("profiles").select("*").eq("id", me.id).single();
+  const { data, error } = await sb.from("profiles").select("*").eq("id", me.id).single();
+  if (error) console.error("profiles", error);
   profile = data; return data;
 }
-
 function forceName(){
   return new Promise(resolve => {
     const o = modal(`<h3 style="margin:0">أهلاً بيك في ${esc(APP_NAME)} 👋</h3>
@@ -380,64 +348,24 @@ function forceName(){
     o.querySelector("#nm").addEventListener("keydown", e => { if (e.key==="Enter") go(); });
   });
 }
-
-function setHeader(){ \$("meName").textContent = (profile?.display_name || "") + "  " + showPhone(profile?.phone); }
-
+function setHeader(){ $("meName").textContent = (profile?.display_name || "") + "  " + showPhone(profile?.phone); }
 async function start(){
-  await loadProfile();
-  $("auth").classList.add("hide"); $("app").classList.remove("hide");
-  if (profile && (!profile.display_name || profile.display_name === profile.phone)){ await forceName(); await loadProfile(); }
-  setHeader();
-  await loadConvs();
-  channel = sb.channel("msgs").on("postgres_changes", { event:"INSERT", schema:"public", table:"messages" }, p => onNewMsg(p.new)).subscribe();
+  try{
+    await loadProfile();
+    $("auth").classList.add("hide"); $("app").classList.remove("hide");
+    if (!profile) toast("دخلت، بس مفيش ملف شخصي (profiles) للحساب ده. راجع الـ trigger في قاعدة البيانات.");
+    if (profile && (!profile.display_name || profile.display_name === profile.phone)){ await forceName(); await loadProfile(); }
+    setHeader();
+    await loadConvs();
+    channel = sb.channel("msgs").on("postgres_changes", { event:"INSERT", schema:"public", table:"messages" }, p => onNewMsg(p.new)).subscribe();
+  }catch(e){
+    console.error(e);
+    $("auth").classList.add("hide"); $("app").classList.remove("hide");
+    toast("حصلت مشكلة وأنا بحمّل التطبيق: " + (e.message || e));
+  }
 }
 
-/* ---------- لوحة المطور (Developer Dashboard) ---------- */
-\$("btnDev").onclick = async () => {
-  const o = modal(`
-    <h3 style="margin:0">🛠️ لوحة المطور</h3>
-    <div style="font-size:13px;color:var(--mu)">إدارة المستخدمين والأكواد والتطبيقات</div>
-    <hr style="border:0;border-top:1px solid #eee;margin:8px 0">
-    
-    <h4>1. إنشاء / تعيين كود لمستخدم</h4>
-    <input id="devPhone" placeholder="رقم الهاتف (مثال: 201102464297)">
-    <input id="devCode" placeholder="الكود المكون من 6 أرقام" maxlength="6">
-    <button id="devSetCode">تعيين الكود</button>
-
-    <hr style="border:0;border-top:1px solid #eee;margin:12px 0">
-    
-    <h4>2. حظر / فك حظر مستخدم</h4>
-    <input id="devBanPhone" placeholder="رقم الهاتف للحظر/الفك">
-    <div class="row">
-      <button id="devBan" class="danger">حظر</button>
-      <button id="devUnban" class="sec">فك الحظر</button>
-    </div>
-  `);
-
-  o.querySelector("#devSetCode").onclick = async () => {
-    const p = o.querySelector("#devPhone").value.trim();
-    const c = o.querySelector("#devCode").value.trim();
-    if (!p || c.length !== 6) return toast("أدخل رقم الهاتف والكود المكون من 6 أرقام");
-    const { error } = await sb.rpc("set_user_login_code", { p_phone: p, p_code: c });
-    if (error) toast("خطأ: " + error.message); else toast("تم تعيين الكود بنجاح!");
-  };
-
-  o.querySelector("#devBan").onclick = async () => {
-    const p = o.querySelector("#devBanPhone").value.trim();
-    if (!p) return toast("أدخل رقم الهاتف");
-    const { error } = await sb.from("profiles").update({ is_banned: true }).eq("phone", p);
-    if (error) toast("خطأ: " + error.message); else toast("تم حظر المستخدم!");
-  };
-
-  o.querySelector("#devUnban").onclick = async () => {
-    const p = o.querySelector("#devBanPhone").value.trim();
-    if (!p) return toast("أدخل رقم الهاتف");
-    const { error } = await sb.from("profiles").update({ is_banned: false }).eq("phone", p);
-    if (error) toast("خطأ: " + error.message); else toast("تم فك الحظر عن المستخدم!");
-  };
-};
-
-\$("btnMe").onclick = () => {
+$("btnMe").onclick = () => {
   const o = modal(`<h3 style="margin:0">بياناتي</h3>
     <div style="direction:ltr;text-align:left;color:var(--mu)">${esc(showPhone(profile?.phone))}</div>
     <input id="pName" placeholder="الاسم" value="${esc(profile?.display_name)}" maxlength="40">
@@ -450,7 +378,7 @@ async function start(){
   };
 };
 
-/* ---------- قائمة المحادثات باقي الكود ---------- */
+/* ---------- قائمة المحادثات ---------- */
 async function loadConvs(){
   const { data, error } = await sb.from("conversation_members").select("conversation_id, conversations(id,is_group,is_public,name,created_at)").eq("user_id", me.id);
   if (error) return toast(error.message);
@@ -464,20 +392,21 @@ async function loadConvs(){
   renderList();
 }
 function renderList(){
-  const l = \$("list");
+  const l = $("list");
   if (!convs.length){ l.innerHTML = `<div style="padding:20px;color:var(--mu);text-align:center">لسه مفيش محادثات. دوّر على حد برقمه أو اعمل مجموعة.</div>`; return; }
   l.innerHTML = convs.map(c => `<div class="conv ${current?.id===c.id?"active":""}" data-id="${c.id}"><div class="av">${esc(c.title.trim().charAt(0)||"?")}</div><div><div class="t">${esc(c.title)}</div><div class="s">${c.is_group?"مجموعة":"محادثة خاصة"}</div></div></div>`).join("");
   l.querySelectorAll(".conv").forEach(e => e.onclick = () => openConv(convs.find(c => c.id===e.dataset.id)));
 }
 
+/* ---------- المحادثة ---------- */
 async function openConv(c){
   current = c;
-  \$("empty").classList.add("hide"); $("chat").classList.remove("hide"); $("chat").style.display="flex";
-  \$("chatName").textContent = c.title;
-  \$("btnInvite").classList.toggle("hide", !c.is_group);
-  \$("app").classList.add("chat");
-  \$("banBanner").classList.toggle("hide", !profile?.is_banned);
-  \$("msgs").innerHTML = ""; renderList();
+  $("empty").classList.add("hide"); $("chat").classList.remove("hide"); $("chat").style.display="flex";
+  $("chatName").textContent = c.title;
+  $("btnInvite").classList.toggle("hide", !c.is_group);
+  $("app").classList.add("chat");
+  $("banBanner").classList.toggle("hide", !profile?.is_banned);
+  $("msgs").innerHTML = ""; renderList();
   const { data, error } = await sb.from("messages").select("*").eq("conversation_id", c.id).order("created_at", { ascending:true }).limit(200);
   if (error) return toast(error.message);
   await ensureNames((data||[]).map(m => m.sender_id));
@@ -506,9 +435,9 @@ async function appendMsg(m){
   const who = (!mine && current?.is_group) ? `<div class="who">${esc(names[m.sender_id]||"")}</div>` : "";
   const tm = new Date(m.created_at).toLocaleTimeString("ar-EG", { hour:"2-digit", minute:"2-digit" });
   d.innerHTML = `${who}${body}<div class="tm">${tm}</div>`;
-  \$("msgs").appendChild(d);
+  $("msgs").appendChild(d);
 }
-function scrollDown(){ const e=\$("msgs"); e.scrollTop = e.scrollHeight; }
+function scrollDown(){ const e=$("msgs"); e.scrollTop = e.scrollHeight; }
 
 async function onNewMsg(m){
   if (current && m.conversation_id === current.id){
@@ -519,22 +448,23 @@ async function onNewMsg(m){
   if (!convs.find(c => c.id === m.conversation_id)) await loadConvs();
 }
 
+/* ---------- الإرسال ---------- */
 async function afterSend(){
   const before = profile?.strikes || 0;
   await loadProfile();
-  if (profile.is_banned){ \$("banBanner").classList.remove("hide"); toast("تم حظر حسابك بسبب الشتائم"); }
+  if (profile.is_banned){ $("banBanner").classList.remove("hide"); toast("تم حظر حسابك بسبب الشتائم"); }
   else if (profile.strikes > before) toast(`تحذير: ممنوع الشتائم في المحادثات الخاصة (${profile.strikes})`);
 }
 async function sendMsg(row){
   if (!current) return;
-  if (profile?.is_banned){ \$("banBanner").classList.remove("hide"); return; }
+  if (profile?.is_banned){ $("banBanner").classList.remove("hide"); return; }
   const { error } = await sb.from("messages").insert({ conversation_id: current.id, sender_id: me.id, ...row });
-  if (error){ if (/row-level security/i.test(error.message)) { await loadProfile(); \$("banBanner").classList.toggle("hide", !profile.is_banned); } return toast("فشل الإرسال: " + error.message); }
+  if (error){ if (/row-level security/i.test(error.message)) { await loadProfile(); $("banBanner").classList.toggle("hide", !profile.is_banned); } return toast("فشل الإرسال: " + error.message); }
   if (row.type === "text") afterSend();
 }
-\$("btnSend").onclick = async () => {
-  const t = \$("txt").value.trim(); if (!t) return;
-  \$("txt").value = ""; await sendMsg({ type:"text", body:t });
+$("btnSend").onclick = async () => {
+  const t = $("txt").value.trim(); if (!t) return;
+  $("txt").value = ""; await sendMsg({ type:"text", body:t });
 };
 $("txt").addEventListener("keydown", e => { if (e.key === "Enter") $("btnSend").click(); });
 
@@ -545,7 +475,7 @@ async function upload(blob, ext){
   return path;
 }
 $("btnImg").onclick = () => $("fileImg").click();
-\$("fileImg").onchange = async e => {
+$("fileImg").onchange = async e => {
   const f = e.target.files[0]; e.target.value = ""; if (!f) return;
   if (f.size > 8*1024*1024) return toast("الصورة أكبر من 8 ميجا");
   const ext = (f.name.split(".").pop() || "jpg").toLowerCase();
@@ -553,7 +483,7 @@ $("btnImg").onclick = () => $("fileImg").click();
 };
 
 let rec = null, chunks = [], recStart = 0;
-\$("btnRec").onclick = async () => {
+$("btnRec").onclick = async () => {
   if (rec){ rec.stop(); return; }
   try{
     const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
@@ -562,17 +492,18 @@ let rec = null, chunks = [], recStart = 0;
     rec.onstop = async () => {
       stream.getTracks().forEach(t => t.stop());
       const type = rec.mimeType || "audio/webm"; rec = null;
-      \$("btnRec").textContent = "🎤"; $("btnRec").classList.add("sec"); $("btnRec").classList.remove("danger");
+      $("btnRec").textContent = "🎤"; $("btnRec").classList.add("sec"); $("btnRec").classList.remove("danger");
       const blob = new Blob(chunks, { type }); const secs = Math.round((Date.now()-recStart)/1000);
       if (secs < 1) return;
       const ext = type.includes("mp4") ? "m4a" : type.includes("ogg") ? "ogg" : "webm";
       const p = await upload(blob, ext); if (p) sendMsg({ type:"audio", media_url:p, duration_seconds:secs });
     };
-    rec.start(); \$("btnRec").textContent = "⏹"; $("btnRec").classList.remove("sec"); $("btnRec").classList.add("danger");
+    rec.start(); $("btnRec").textContent = "⏹"; $("btnRec").classList.remove("sec"); $("btnRec").classList.add("danger");
   }catch(err){ toast("مش قادر أوصل للمايك: " + err.message); }
 };
 
-\$("btnFindUser").onclick = () => {
+/* ---------- البحث والمجموعات ---------- */
+$("btnFindUser").onclick = () => {
   const o = modal(`<h3 style="margin:0">دوّر على شخص برقم الموبايل</h3>
     <div class="row phoneRow"><select id="fCountry">${countryOptions(myDial())}</select><input id="fPhone" type="tel" inputmode="tel" placeholder="رقم الموبايل"></div>
     <button id="fGo">بحث</button><div id="fRes"></div>`);
@@ -591,7 +522,7 @@ let rec = null, chunks = [], recStart = 0;
     });
   };
 };
-\$("btnFindGroup").onclick = () => {
+$("btnFindGroup").onclick = () => {
   const o = modal(`<h3 style="margin:0">دوّر على مجموعة عامة</h3>
     <input id="gQ" placeholder="اسم المجموعة"><button id="gGo">بحث</button><div id="gRes"></div>`);
   o.querySelector("#gGo").onclick = async () => {
@@ -607,7 +538,7 @@ let rec = null, chunks = [], recStart = 0;
     });
   };
 };
-\$("btnNewGroup").onclick = () => {
+$("btnNewGroup").onclick = () => {
   const o = modal(`<h3 style="margin:0">مجموعة جديدة</h3>
     <input id="ngName" placeholder="اسم المجموعة" maxlength="60">
     <label><input type="checkbox" id="ngPub" style="width:auto"> مجموعة عامة (تظهر في البحث)</label>
@@ -627,7 +558,7 @@ let rec = null, chunks = [], recStart = 0;
     o.remove(); await loadConvs(); openConv(convs.find(c => c.id === cid));
   };
 };
-\$("btnJoinCode").onclick = () => {
+$("btnJoinCode").onclick = () => {
   const o = modal(`<h3 style="margin:0">انضم بكود دعوة</h3><input id="jc" placeholder="الكود" style="direction:ltr"><button id="jcGo">انضم</button>`);
   o.querySelector("#jcGo").onclick = async () => {
     const { data: cid, error } = await sb.rpc("join_group_by_code", { c: o.querySelector("#jc").value.trim() });
@@ -635,7 +566,7 @@ let rec = null, chunks = [], recStart = 0;
     o.remove(); await loadConvs(); openConv(convs.find(c => c.id === cid));
   };
 };
-\$("btnInvite").onclick = async () => {
+$("btnInvite").onclick = async () => {
   const { data: code, error } = await sb.rpc("create_invite", { cid: current.id });
   if (error) return toast(error.message);
   modal(`<h3 style="margin:0">كود الدعوة</h3><div style="font-size:24px;text-align:center;letter-spacing:2px;direction:ltr">${esc(code)}</div><div style="color:var(--mu);font-size:13px">الكود صالح 7 أيام. ابعته لأي حد ويدخل بيه من زر "كود دعوة".</div>`);
