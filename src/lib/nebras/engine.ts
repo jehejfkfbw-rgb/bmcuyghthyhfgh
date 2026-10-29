@@ -429,6 +429,7 @@ async function checkServerSmoke(dir: string): Promise<CheckResult[]> {
   const port = 3900 + Math.floor(Math.random() * 500);
   let child: ChildProcess | null = null;
   try {
+    /* turbopackIgnore: true */
     child = spawn("node", [path.join(dir, "src/server.js")], {
       env: { ...process.env, PORT: String(port) },
       stdio: ["ignore", "pipe", "pipe"],
